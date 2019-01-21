@@ -6,7 +6,7 @@ import threading
 
 serverAddr = '192.168.50.43'
 raspberry = '192.168.50.42'
-options  = ' --win 0,0,800,480 --display 4 '
+options  = ' --win 0,0,1920,1080 --display 5 '
 
 
 def main():
