@@ -1,16 +1,13 @@
 import sys
 import socket
-import select
 import os
-import threading
 import time
 import vlc
 
 host ='192.168.50.43'
 port = '9998'
-threadIsAlive = True
 
-def StartServer(filepath,raspberry, clientSocket):
+def PlayVideo(filepath,raspberry, clientSocket):
 	try:
 		option = "sout=#standard{access=udp,mux=ts,dst=" +raspberry +":"+port+"}"
 		vlcInstance = vlc.Instance()
@@ -21,6 +18,8 @@ def StartServer(filepath,raspberry, clientSocket):
 		print("Is about to enter the while loop")
 		clientSocket.setblocking(1)
 		command = clientSocket.recv(1024)
+		while True:
+			continue
 		while command not in 'quit' and vlcPlayer.is_playing():
 			if 'pause' in command:
 				vlcPlayer.pause()
@@ -32,11 +31,9 @@ def StartServer(filepath,raspberry, clientSocket):
 				command = clientSocket.recv(1024)
 			except:
 				command = 'continue'
-		clientSocket.close()
-		threadIsAlive = False
+		print("About to return to main thread")
 		return
 	except:
-		ThreadIsAlive = False
 		clientSocket.close()
 		vlcPlayer.stop()
 		print("server crashed")
@@ -52,20 +49,14 @@ def main():
 	clientSocket, raspberryTuple = serverSocket.accept()
 	raspberry = raspberryTuple[0]
 	clientSocket.send(port)
-	serverThread = threading.Thread(target=StartServer,args=(filepath, raspberry, clientSocket))
 	try:
-		serverThread.start()
-		while threadIsAlive:
-			time.sleep(3)
-			continue
-		print("The movie Ended")
-		serversocket.close()
-		clientSocket.close()
-	except KeyboardInterrupt:
-		serverThread.join()
+		PlayVideo(filepath, raspberry,clientSocket)
 		serverSocket.close()
 		clientSocket.close()
-		serverThread.join()
+
+	except KeyboardInterrupt:
+		serverSocket.close()
+		clientSocket.close()
 		sys.exit()
 	
 	
