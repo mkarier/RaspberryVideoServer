@@ -5,9 +5,8 @@ import threading
 
 
 serverAddr = '192.168.50.43'
-raspberry = '192.168.50.42'
 options  = ' --win 0,0,800,480 --display 4 '
-
+#options = ' --win 0,0,1920,1080 --display 5 '
 
 def main():
 	socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,10 +17,13 @@ def main():
 	#socketClient.send(raspberry)
 	videoPort = socketClient.recv(1024)
 	print ("Video port: " + videoPort)
+	systemCommand = 'omxplayer' + options +'udp://' + serverAddr + ':' + videoPort
+	numberOfVideos = socketClient.recv(1024)
 	try:
-		socketClient.send('start')
-		os.system('omxplayer' + options + 'udp://' + serverAddr + ':' + videoPort)
-		socketClient.send('quit')
+		for videoIndex in range(int(numberOfVideos)):
+			socketClient.send('start')
+			os.system(systemCommand)
+			socketClient.send('quit')
 		socketClient.close()
 
 	except KeyboardInterrupt:
