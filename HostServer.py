@@ -18,9 +18,7 @@ def PlayVideo(filepath,raspberry, clientSocket):
 		print("Is about to enter the while loop")
 		clientSocket.setblocking(1)
 		command = clientSocket.recv(1024)
-		while True:
-			continue
-		while command not in 'quit' and vlcPlayer.is_playing():
+		while (command not in "quit") and (vlcPlayer.get_position() < 1.0):
 			if 'pause' in command:
 				vlcPlayer.pause()
 			elif 'play' in command:
@@ -40,7 +38,7 @@ def PlayVideo(filepath,raspberry, clientSocket):
 		raise
 
 def main():
-	filepath = sys.argv[1]
+	numberOfVideos = len(sys.argv)
 	listenPort = 9000
 	serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	serverSocket.bind((host, listenPort))
@@ -49,8 +47,10 @@ def main():
 	clientSocket, raspberryTuple = serverSocket.accept()
 	raspberry = raspberryTuple[0]
 	clientSocket.send(port)
+	clientSocket.send(str(numberOfVideos -1))
 	try:
-		PlayVideo(filepath, raspberry,clientSocket)
+		for videoIndex in range(1, numberOfVideos):
+			PlayVideo(sys.argv[videoIndex], raspberry,clientSocket)
 		serverSocket.close()
 		clientSocket.close()
 
