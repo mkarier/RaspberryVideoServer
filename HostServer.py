@@ -9,7 +9,7 @@ port = "9998"
 
 def PlayVideo(filepath,raspberry, clientSocket):
 	try:
-		option = "sout=#standard{access=udp,mux=ts,dst=" +raspberry +":"+port+"}"
+		option = "sout=#transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:standard{access=udp,mux=ts,dst=" +raspberry +":"+port+"}"
 		vlcInstance = vlc.Instance()
 		vlcPlayer = vlcInstance.media_player_new()
 		vlcMedia = vlcInstance.media_new(filepath, option)
@@ -43,7 +43,6 @@ def PlayVideoWithSubtitles(filepath,raspberry, clientSocket, sub):
 		vlcInstance = vlc.Instance()
 		vlcPlayer = vlcInstance.media_player_new()
 		vlcMedia = vlcInstance.media_new(filepath, option)
-		#vlcPlayer.slaves_add('subtitle', 1, sub)
 		vlcPlayer.set_media(vlcMedia)
 		vlcPlayer.video_set_subtitle_file(sub)
 		vlcPlayer.play()
