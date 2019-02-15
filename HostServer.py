@@ -7,30 +7,46 @@ import vlc
 host ="192.168.50.43"
 port = "9998"
 
+def createVLCInstance(hasSub, filepath, raspberry):
+	start = "sout=#"
+	standard = "standard{access=udp,mux=ts,dst=" +raspberry +":"+port+"}"
+	transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:"
+	transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:"
+	option = ''
+	if(hasSub):
+		option = start + transcodeForSub + standard 
+	else:
+		option = start + transcodeForNoSub + standard
+	vlcInstance = vlc.Instance()
+	vlcPlayer = vlcInstance.media_player_new()
+	vlcMedia = vlcInstance.media_new(filepath, option)
+	vlcPlayer.set_media(vlcMedia)
+	return vlcPlayer
+
+def streamingVideo(vlcPlayer, clientSocket):
+	vlcPlayer.play()
+	print("Now starting reading from socket")
+	clientSocket.setblocking(1)
+	command = str(clientSocket.recv(1024))
+	while ('quit' not in command) and (vlcPlayer.get_position() < 1.0):
+		if 'pause' in command:
+			vlcPlayer.pause()
+		elif 'play' in command:
+			vlcPlayer.play()
+		elif 'stop' in command:
+			vlcPlayer.stop()
+		try:
+			command = str(clientSocket.recv(1024))
+		except:
+			command = 'continue'
+	print("About to return to main thread")
+	return
+		
+	
 def PlayVideo(filepath,raspberry, clientSocket):
 	try:
-		option = "sout=#transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:standard{access=udp,mux=ts,dst=" +raspberry +":"+port+"}"
-		vlcInstance = vlc.Instance()
-		vlcPlayer = vlcInstance.media_player_new()
-		vlcMedia = vlcInstance.media_new(filepath, option)
-		vlcPlayer.set_media(vlcMedia)
-		vlcPlayer.play()
-		print("Now starting reading from socket")
-		clientSocket.setblocking(1)
-		command = str(clientSocket.recv(1024))
-		while ('quit' not in command) and (vlcPlayer.get_position() < 1.0):
-			if 'pause' in command:
-				vlcPlayer.pause()
-			elif 'play' in command:
-				vlcPlayer.play()
-			elif 'stop' in command:
-				vlcPlayer.stop()
-			try:
-				command = str(clientSocket.recv(1024))
-			except:
-				command = 'continue'
-		print("About to return to main thread")
-		return
+		vlcPlayer = createVLCInstance(False, filepath, raspberry)
+		streamingVideo(vlcPlayer, clientSocket)
 	except:
 		clientSocket.close()
 		vlcPlayer.stop()
@@ -39,29 +55,9 @@ def PlayVideo(filepath,raspberry, clientSocket):
 
 def PlayVideoWithSubtitles(filepath,raspberry, clientSocket, sub):
 	try:
-		option = "sout=#transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:standard{access=udp,mux=ts,dst=" +raspberry +":"+port+"}"
-		vlcInstance = vlc.Instance()
-		vlcPlayer = vlcInstance.media_player_new()
-		vlcMedia = vlcInstance.media_new(filepath, option)
-		vlcPlayer.set_media(vlcMedia)
+		vlcPlayer = createVLCInstance(True, filepath, raspberry)
 		vlcPlayer.video_set_subtitle_file(sub)
-		vlcPlayer.play()
-		print("Now starting reading from socket")
-		clientSocket.setblocking(1)
-		command = str(clientSocket.recv(1024))
-		while ('quit' not in command) and (vlcPlayer.get_position() < 1.0):
-			if 'pause' in command:
-				vlcPlayer.pause()
-			elif 'play' in command:
-				vlcPlayer.play()
-			elif 'stop' in command:
-				vlcPlayer.stop()
-			try:
-				command = str(clientSocket.recv(1024))
-			except:
-				command = 'continue'
-		print("About to return to main thread")
-		return
+		streamingVideo(vlcPlayer, clientSocket)
 	except:
 		clientSocket.close()
 		vlcPlayer.stop()
