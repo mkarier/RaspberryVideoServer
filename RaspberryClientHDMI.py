@@ -6,7 +6,7 @@ import threading
 
 serverAddr = '192.168.50.43'
 #options  = ' --win 0,0,800,480 --display 4 '
-options = ' --win 0,0,1920,1080 --display 5 '
+options = ' -o hdmi --win 0,0,1920,1080 --display 5 '
 
 def main():
 	socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
