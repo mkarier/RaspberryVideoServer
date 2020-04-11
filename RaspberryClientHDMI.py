@@ -4,9 +4,9 @@ import os
 import threading
 
 
-serverAddr = '192.168.50.43'
+serverAddr = 'mkarier-desktop.local'
 #options  = ' --win 0,0,800,480 --display 4 '
-options = ' -o hdmi --win 0,0,1920,1080 --display 5 '
+options = ' -o hdmi --win 0,0,1920,1080 --display 2 '
 
 def main():
 	socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,12 +18,12 @@ def main():
 	videoPort = socketClient.recv(1024)
 	print ("Video port: " + videoPort)
 	systemCommand = 'omxplayer' + options +'udp://' + serverAddr + ':' + videoPort
-	numberOfVideos = socketClient.recv(1024)
+	numberOfVideos = socketClient.recv(1024).decode()
 	try:
 		for videoIndex in range(int(numberOfVideos)):
-			socketClient.send('start')
+			socketClient.send('start'.encode)
 			os.system(systemCommand)
-			socketClient.send('quit')
+			socketClient.send('quit'.encode)
 		socketClient.close()
 
 	except KeyboardInterrupt:

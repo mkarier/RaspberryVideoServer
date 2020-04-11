@@ -4,8 +4,8 @@ import os
 import threading
 
 
-serverAddr = '192.168.50.43'
-options  = ' --win 0,0,800,480 --display 4 '
+serverAddr = 'mkarier-desktop.local'
+options  = ' --win 0,0,800,480 --display 4 --adev alsa '
 #options = ' --win 0,0,1920,1080 --display 5 '
 
 def main():
@@ -15,15 +15,15 @@ def main():
 	socketClient.connect((serverAddr, chatPort))
 	print ("formed a connection with server")
 	#socketClient.send(raspberry)
-	videoPort = socketClient.recv(1024)
+	videoPort = socketClient.recv(1024).decode()
 	print ("Video port: " + videoPort)
 	systemCommand = 'omxplayer' + options +'udp://' + serverAddr + ':' + videoPort
-	numberOfVideos = socketClient.recv(1024)
+	numberOfVideos = socketClient.recv(1024).decode()
 	try:
 		for videoIndex in range(int(numberOfVideos)):
-			socketClient.send('start')
+			socketClient.send('start'.encode())
 			os.system(systemCommand)
-			socketClient.send('quit')
+			socketClient.send('quit'.encode())
 		socketClient.close()
 
 	except KeyboardInterrupt:
