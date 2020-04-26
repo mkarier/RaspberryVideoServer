@@ -95,17 +95,18 @@ def PlayVideoWithSubtitles(filepath,raspberry, clientSocket, sub):
         
 def main():
     numberOfVideos = len(sys.argv)
-    listOfVideos = []
-    if(sys.argv[1] == "-d"):     
-            for argNum in range(2, numberOfVideos):
-                root = sys.argv[argNum]
-                for file in os.listdir(root):
-                        for type in videoTypes:
-                            if(file.endswith(type)):
-                                listOfVideos.append(os.path.join(root, file))
-                                print("added: " + os.path.join(root, file) + "\n")
-    else:
-        listOfVideos = sys.argv
+    listOfVideos = []    
+    for argNum in range(1, numberOfVideos):
+        root = sys.argv[argNum]
+        if(os.path.isdir(root)):
+            for file in os.listdir(root):
+                for type in videoTypes:
+                    if(file.endswith(type)):
+                        listOfVideos.append(os.path.join(root, file))
+                        print("added: " + os.path.join(root, file) + "\n")
+        else:
+            listOfVideos.append(root)
+            print("added: " + root)
     listenPort = 9000
     hasSubtitles = False
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -115,15 +116,15 @@ def main():
     clientSocket, raspberryTuple = serverSocket.accept()
     raspberry = raspberryTuple[0]
     clientSocket.send(port.encode())
-    if( '--sub' in sys.argv[1]):
+    if( '--sub' in listOfVideos[0]):
         print("Video Has Subtitles")
         hasSubtitles = True
         numberOfVideos = 2
     clientSocket.send(str(len(listOfVideos)).encode())
     try:
-        for videoIndex in range(1, len(listOfVideos)):
+        for videoIndex in range(0, len(listOfVideos)):
             if(hasSubtitles):
-                PlayVideoWithSubtitles(listOfVideos[2], raspberry, clientSocket, listOfVideos[3])
+                PlayVideoWithSubtitles(listOfVideos[1], raspberry, clientSocket, listOfVideos[2])
             else:
                 PlayVideo(listOfVideos[videoIndex], raspberry,clientSocket)
         serverSocket.close()
