@@ -6,6 +6,7 @@ import vlc
 
 host ="192.168.50.62"
 port = "9998"
+startIndex = 0
 
 videoTypes = ['.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
 '.aet', '.aetx', '.ajp', '.ale', '.am', '.amc', '.amv', '.amx', '.anim', '.aqt', '.arcut', '.arf', '.asf', '.asx', '.avb',
@@ -92,7 +93,16 @@ def PlayVideoWithSubtitles(filepath,raspberry, clientSocket, sub):
         vlcPlayer.stop()
         print("server crashed")
         raise        
-        
+
+def CheckIfIndex(root):
+    try:
+        int(root)
+        return True
+    except ValueError:
+        return False
+
+
+
 def main():
     numberOfVideos = len(sys.argv)
     listOfVideos = []    
@@ -104,9 +114,12 @@ def main():
                     if(file.endswith(type)):
                         listOfVideos.append(os.path.join(root, file))
                         print("added: " + os.path.join(root, file) + "\n")
+        elif(CheckIfIndex(root)):
+            startIndex = int(root)
+            print("Starting at " + root + "\n")
         else:
             listOfVideos.append(root)
-            print("added: " + root)
+            print("added: " + root + "\n")
     listenPort = 9000
     hasSubtitles = False
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -122,7 +135,7 @@ def main():
         numberOfVideos = 2
     clientSocket.send(str(len(listOfVideos)).encode())
     try:
-        for videoIndex in range(0, len(listOfVideos)):
+        for videoIndex in range(startIndex, len(listOfVideos)):
             if(hasSubtitles):
                 PlayVideoWithSubtitles(listOfVideos[1], raspberry, clientSocket, listOfVideos[2])
             else:
