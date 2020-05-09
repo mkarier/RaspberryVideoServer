@@ -104,6 +104,7 @@ def CheckIfIndex(root):
 
 
 def main():
+    startIndex = 0
     numberOfVideos = len(sys.argv)
     listOfVideos = []    
     for argNum in range(1, numberOfVideos):
