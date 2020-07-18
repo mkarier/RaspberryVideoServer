@@ -20,7 +20,7 @@ videoTypes = ['.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2'
 '.hkm', '.ifo', '.imovieproj', '.imovieproject', '.ircp', '.irf', '.ism', '.ismc', '.ismv', '.iva', '.ivf', '.ivr', '.ivs',
 '.izz', '.izzy', '.jss', '.jts', '.jtv', '.k3g', '.kmv', '.ktn', '.lrec', '.lsf', '.lsx', '.m15', '.m1pg', '.m1v', '.m21',
 '.m21', '.m2a', '.m2p', '.m2t', '.m2ts', '.m2v', '.m4e', '.m4u', '.m4v', '.m75', '.mani', '.meta', '.mgv', '.mj2', '.mjp',
-'.mjpg', '.mk3d', '.mkv', '.mmv', '.mnv', '.mob', '.mod', '.modd', '.moff', '.moi', '.moov', '.mov', '.movie', '.mp21',
+'.mjpg', '.mk3d', '.mkv', '.mmv', '.mnv', '.mob', '.mod', '.modd', '.moff', '.moi', '.moov', '.mov', '.movie', '.mp21', 'mp3',
 '.mp21', '.mp2v', '.mp4', '.mp4v', '.mpe', '.mpeg', '.mpeg1', '.mpeg4', '.mpf', '.mpg', '.mpg2', '.mpgindex', '.mpl',
 '.mpl', '.mpls', '.mpsub', '.mpv', '.mpv2', '.mqv', '.msdvd', '.mse', '.msh', '.mswmm', '.mts', '.mtv', '.mvb', '.mvc',
 '.mvd', '.mve', '.mvex', '.mvp', '.mvp', '.mvy', '.mxf', '.mxv', '.mys', '.ncor', '.nsv', '.nut', '.nuv', '.nvc', '.ogm',
@@ -94,6 +94,17 @@ def PlayVideoWithSubtitles(filepath,raspberry, clientSocket, sub):
         print("server crashed")
         raise        
 
+def PlayVideoWithImbeddedSubtitles(filepath,raspberry, clientSocket):
+    try:
+        vlcPlayer = createVLCInstance(True, filepath, raspberry)
+        streamingVideo(vlcPlayer, clientSocket)
+    except:
+        clientSocket.close()
+        vlcPlayer.stop()
+        print("server crashed")
+        raise   
+
+
 def CheckIfIndex(root):
     try:
         int(root)
@@ -106,7 +117,8 @@ def CheckIfIndex(root):
 def main():
     startIndex = 0
     numberOfVideos = len(sys.argv)
-    listOfVideos = []    
+    listOfVideos = []
+    allEmbededSubtitles = False
     for argNum in range(1, numberOfVideos):
         root = sys.argv[argNum]
         if(os.path.isdir(root)):
@@ -118,6 +130,8 @@ def main():
         elif(CheckIfIndex(root)):
             startIndex = int(root)
             print("Starting at " + root + "\n")
+        elif(root == "-es"):
+            allEmbededSubtitles = True
         else:
             listOfVideos.append(root)
             print("added: " + root + "\n")
@@ -139,6 +153,8 @@ def main():
         for videoIndex in range(startIndex, len(listOfVideos)):
             if(hasSubtitles):
                 PlayVideoWithSubtitles(listOfVideos[1], raspberry, clientSocket, listOfVideos[2])
+            elif(allEmbededSubtitles):
+                PlayVideoWithImbeddedSubtitles(listOfVideos[videoIndex], raspberry, clientSocket)
             else:
                 PlayVideo(listOfVideos[videoIndex], raspberry,clientSocket)
         serverSocket.close()

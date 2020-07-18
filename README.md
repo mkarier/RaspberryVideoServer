@@ -12,6 +12,7 @@ for the desktop that you are using is placed in there.
 
 example: 
 	python3 Host.py /path/to/VideoFile /path/to/another/video/file
+	python3 Host.py /Path/to/VideoFile /Path/to/another/Video/FODLEREVEN -es /To/Turn/On/Embedded/Subtiltes/For/All/Videos
 	python3 Host.py --sub /path/to/VideoFile /path/to/Subtitle/File
 	python3 Host.py -d /path/to/folder/with/videos/ /path/to/another/folder/with/videos/
 NOTE:
