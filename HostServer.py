@@ -57,8 +57,10 @@ def streamingVideo(vlcPlayer, clientSocket):
     vlcPlayer.play()
     print("Now starting reading from socket")
     clientSocket.setblocking(1)
+    clientSocket.settimeout(1)
     command = str(clientSocket.recv(1024))
-    while ('quit' not in command) and (vlcPlayer.get_position() < 1.0):
+    while ('quit' not in command) and (vlcPlayer.get_position() < 0.99):
+        print('position ' + str(vlcPlayer.get_position()))
         if 'pause' in command:
             vlcPlayer.pause()
         elif 'play' in command:
@@ -68,7 +70,7 @@ def streamingVideo(vlcPlayer, clientSocket):
         try:
             command = str(clientSocket.recv(1024))
         except:
-            command = 'continue'
+            command = 'continue'   
     print("About to return to main thread")
     return
         

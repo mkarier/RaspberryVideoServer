@@ -14,7 +14,6 @@ testPort = "9998"
 
 
 def startPlayer(videoPort):
-    time.sleep(2)
     vlc_instance = vlc.Instance()
     media_player = vlc_instance.media_player_new()
     media = vlc_instance.media_new(streamStyle+":"+testPort)
@@ -23,9 +22,11 @@ def startPlayer(videoPort):
     media_player.set_media(media)
     media_player.play()
     media_player.set_fullscreen(True)
-    time.sleep(10)
+    time.sleep(3)
     while(media_player.is_playing()):
         time.sleep(1)
+    media_player.stop()
+    media_player.release()
 
 '''def otherPlayer(videoPort):
     window = vlcPlayer.ApplicationWindow()
