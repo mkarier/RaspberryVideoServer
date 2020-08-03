@@ -58,7 +58,7 @@ def streamingVideo(vlcPlayer, clientSocket):
     print("Now starting reading from socket")
     clientSocket.setblocking(1)
     clientSocket.settimeout(1)
-    command = str(clientSocket.recv(1024))
+    command = 'continue'
     while ('quit' not in command) and (vlcPlayer.get_position() < 0.99):
         print('position ' + str(vlcPlayer.get_position()))
         if 'pause' in command:
@@ -70,7 +70,9 @@ def streamingVideo(vlcPlayer, clientSocket):
         try:
             command = str(clientSocket.recv(1024))
         except:
-            command = 'continue'   
+            command = 'continue'
+    #clientSocket.send('quit'.encode())
+    vlcPlayer.release()
     print("About to return to main thread")
     return
         
@@ -159,6 +161,7 @@ def main():
                 PlayVideoWithImbeddedSubtitles(listOfVideos[videoIndex], raspberry, clientSocket)
             else:
                 PlayVideo(listOfVideos[videoIndex], raspberry,clientSocket)
+            #time.sleep(10)
         serverSocket.close()
         clientSocket.close()
 

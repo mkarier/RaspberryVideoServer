@@ -13,48 +13,40 @@ testPort = "9998"
 
 
 
-def startPlayer(videoPort):
-    vlc_instance = vlc.Instance()
-    media_player = vlc_instance.media_player_new()
-    media = vlc_instance.media_new(streamStyle+":"+testPort)
-    media.get_mrl()
-   # media_player.set_mrl(streamStyle+serverAddr+":"+videoPort)
-    media_player.set_media(media)
+def startPlayer(media_player, vlc_instance, videoPort, socketClient):
+    #media = vlc_instance.media_new(streamStyle+":"+videoPort)
+   # media.get_mrl()
+    media_player.set_mrl(streamStyle+":"+videoPort)
+    #media_player.set_media(media)
     media_player.play()
     media_player.set_fullscreen(True)
-    time.sleep(3)
-    while(media_player.is_playing()):
-        time.sleep(1)
-    media_player.stop()
-    media_player.release()
+    waitForEnding(socketClient)
 
-'''def otherPlayer(videoPort):
-    window = vlcPlayer.ApplicationWindow()
-    window.setup_objects_and_events()
-    window.setMRL(streamStyle+serverAddr+":"+videoPort)
-    window.show()
-    Gtk.main()'''
-    
-def simplePlayer():
-    os.system("vlc " + streamStyle+serverAddr+":"+videoPort)
-
+def waitForEnding(socketClient):
+    command = str(socketClient.recv(1024).decode())
+    while(command != "quit"):
+        command = str(socketClient.recv(1024).decode())
 
 def main():
     socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     chatPort = 9000
+    
     print ("Trying to connect to server")
     socketClient.connect((serverAddr, chatPort))
     print ("formed a connection with server")
     #socketClient.send(raspberry)
     videoPort = socketClient.recv(1024).decode()
     print ("Video port: " + videoPort)
+    vlc_instance = vlc.Instance()
+    media_player = vlc_instance.media_player_new()
     numberOfVideos = socketClient.recv(1024).decode()
     try:
         for videoIndex in range(int(numberOfVideos)):
             socketClient.send('start'.encode())
-            startPlayer(videoPort)
+            startPlayer(media_player, vlc_instance, videoPort, socketClient)
             #otherPlayer(videoPort)
-            socketClient.send('quit'.encode())
+            #socketClient.send('quit'.encode())
+            time.sleep(10)
         socketClient.close()
 
     except KeyboardInterrupt:
