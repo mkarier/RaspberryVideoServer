@@ -18,14 +18,24 @@ public class ClientMain
 	{
 		// TODO Auto-generated method stub
 		try {
-			NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
+			if(System.getProperty("os.name").contains("Windows"))
+				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
+			else
+				System.out.println("OS = linux");
 			Socket socket = new Socket(host, SharedData.comPort);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			String videoPort = in.readLine();
 			System.out.println("video Port = " + videoPort);
-			StreamClient client = new StreamClient("udp://@:" + videoPort);
-			client.playSomething();
+			String fromServer = "continue";
+			while(!fromServer.contains("quit"))
+			{
+				StreamClient client = new StreamClient("udp://@:" + videoPort);
+				client.playSomething();
+				fromServer = in.readLine();
+				client.close();
+			}
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

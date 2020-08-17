@@ -7,4 +7,7 @@ public class SharedData
 	public static int videoPort = 9998;
 	public static String vlcPath = "C:\\Program Files\\VideoLAN\\VLC";
 	
+	public int start;
+	public boolean hasSubs;
+	
 }
