@@ -16,8 +16,8 @@ public class ClientMain
 	public static String host = "mkarier-desktop";
 	public static void main(String[] args) 
 	{
-		// TODO Auto-generated method stub
-		try {
+		StreamClient player = null;
+		try{
 			if(System.getProperty("os.name").contains("Windows"))
 				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
 			else
@@ -27,18 +27,25 @@ public class ClientMain
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			String videoPort = in.readLine();
 			System.out.println("video Port = " + videoPort);
+			String toPlay = "udp://@:" + videoPort;
 			String fromServer = "continue";
+			player = new StreamClient(out);
 			while(!fromServer.contains("quit"))
 			{
-				StreamClient client = new StreamClient("udp://@:" + videoPort);
-				client.playSomething();
+				player.init(toPlay);
+				player.playSomething();
 				fromServer = in.readLine();
-				client.close();
-			}
+				player.close();
+			}//end of while
+			socket.close();
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		finally
+		{
+			player.close();
 		}
 	}//end of main
 

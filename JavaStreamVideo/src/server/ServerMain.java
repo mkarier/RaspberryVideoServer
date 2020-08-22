@@ -58,7 +58,7 @@ public class ServerMain {
 	{
 		try
 		{
-			float stopPosition = Float.parseFloat("0.02");
+			float stopPosition = Float.parseFloat("0.98");
 			if(System.getProperty("os.name").contains("Windows"));
 				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
 			ArrayList<String> videoTypes = new ArrayList<String>();
@@ -82,14 +82,25 @@ public class ServerMain {
 				streamServer.stream();
 				long duration = streamServer.getDuration();
 				System.out.println("Duration " + duration);
-				while(streamServer.getPosition() < stopPosition)
+				String fromClient = "";
+				try
 				{
-					System.out.println("CurrentTime " + streamServer.getCurrentTime());
-				}
+					fromClient = in.readLine();
+					while(streamServer.getPosition() < stopPosition)
+					{
+						System.out.println("Position " + streamServer.getPosition());
+					}
+				}catch(Exception e) {e.printStackTrace();}
 				streamServer.close();
 				out.write("stop\n");
 				out.flush();
 			}
+			out.write("quit\n");
+			out.flush();
+			in.close();
+			out.close();
+			client.close();
+			server.close();
 		}catch(Exception e)
 		{
 			e.printStackTrace();
@@ -119,7 +130,7 @@ public class ServerMain {
 						if(checkIfDir(arg))
 						{
 							listOfVideos.addAll(getVideosFromDir(arg, videoTypes));
-							cursor = listOfVideos.get(listOfVideos.size() -1);
+							//cursor = listOfVideos.get(listOfVideos.size());
 						}//end of if
 						else if(checkIfSubtitleFile(arg))
 						{
@@ -166,8 +177,12 @@ public class ServerMain {
 		System.out.println("Directory Path " + folder.getPath());
 		for(String file: folder.list())
 		{
-			if(checkIfVideo(file, videoTypes))
-				videos.add(new VideoData(path + "\\" + file));
+			try
+			{
+				if(checkIfVideo(file, videoTypes))
+					videos.add(new VideoData(path + "\\" + file));
+		
+			}catch(StringIndexOutOfBoundsException e) {e.printStackTrace();}
 		}
 		
 		return videos;
