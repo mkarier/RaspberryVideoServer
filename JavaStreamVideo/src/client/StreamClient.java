@@ -89,8 +89,17 @@ public class StreamClient
 		this.box.setVisible(true);
 		this.mediaPlayer = this.componentPlayer.getMediaPlayer();
 		this.mediaPlayer.playMedia(toPlay);
-		this.device.setFullScreenWindow(this.box);
-		this.inFullScreen = true;
+		if(this.inFullScreen)
+		{
+			this.device.setFullScreenWindow(this.box);
+			this.inFullScreen = true;
+		}
+		try {
+			Thread.sleep(10*1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}//end of play something 
 	
 }//end of class

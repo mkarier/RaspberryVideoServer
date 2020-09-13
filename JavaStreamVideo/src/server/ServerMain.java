@@ -116,11 +116,18 @@ public class ServerMain {
 			{
 				fromClient = in.readLine();
 				float position = (float)1.0; //streamServer.getPosition();
+				boolean firstTime = true;
 				while((streamServer.getPosition() != position) && streamServer.isPlaying())
 				{
 					
 					position = streamServer.getPosition();
-					Thread.sleep(5 * 1000);
+					if(firstTime)
+					{
+						firstTime = false;
+						Thread.sleep(30 * 1000);
+					}
+					else
+						Thread.sleep(5 * 1000);
 					//System.out.println("Position " + streamServer.getPosition());
 				}
 				System.out.println("Position " + streamServer.getPosition());
