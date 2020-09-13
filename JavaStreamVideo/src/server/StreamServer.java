@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 
 import shared_class.SharedData;
 import shared_class.VideoData;
+import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.media.Media;
@@ -31,6 +32,7 @@ public class StreamServer extends Thread
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.box.setContentPane(this.componentPlayer);
 		this.box.setVisible(true);
+		this.box.setState(JFrame.ICONIFIED);
 	}
 	
 	public void getOptions()
@@ -84,6 +86,11 @@ public class StreamServer extends Thread
 	public long getDuration() {
 		return this.mediaPlayer.getLength();
 	}
+	
+	public boolean isPlaying()
+	{
+		return libvlc_state_t.libvlc_Playing == this.mediaPlayer.getMediaPlayerState();
+	}//end of is playing
 	
 	public void stream()
 	{

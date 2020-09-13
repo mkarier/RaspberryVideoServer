@@ -33,9 +33,12 @@ public class ClientMain
 			while(!fromServer.contains("quit"))
 			{
 				player.init(toPlay);
+				System.out.println("initialized the player");
 				player.playSomething();
-				fromServer = in.readLine();
+				System.out.println("Starting to play");
+				fromServer = in.readLine();//TODO: make this better. Right now it is waiting for the server to write 'stop' before moving on
 				player.close();
+				System.out.println("Player was closed");
 			}//end of while
 			socket.close();
 			

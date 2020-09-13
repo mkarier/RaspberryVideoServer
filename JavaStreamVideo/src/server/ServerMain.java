@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -54,11 +55,12 @@ public class ServerMain {
 			".zm1", ".zm2", ".zm3", ".zmv"};
 	
 	
+	private static StreamServer streamServer = null;
+	
 	public static void main(String[] args) 
 	{
 		try
 		{
-			float stopPosition = Float.parseFloat("0.98");
 			if(System.getProperty("os.name").contains("Windows"));
 				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
 			ArrayList<String> videoTypes = new ArrayList<String>();
@@ -73,39 +75,62 @@ public class ServerMain {
 			InetAddress address = client.getInetAddress();
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-			out.write(SharedData.videoPort + "\n");
-			out.flush();
+
 			
-			for(VideoData video: listOfVideos)
-			{
-				StreamServer streamServer = new StreamServer(address, video);
-				streamServer.stream();
-				long duration = streamServer.getDuration();
-				System.out.println("Duration " + duration);
-				String fromClient = "";
-				try
-				{
-					fromClient = in.readLine();
-					while(streamServer.getPosition() < stopPosition)
-					{
-						System.out.println("Position " + streamServer.getPosition());
-					}
-				}catch(Exception e) {e.printStackTrace();}
-				streamServer.close();
-				out.write("stop\n");
-				out.flush();
-			}
-			out.write("quit\n");
-			out.flush();
-			in.close();
-			out.close();
-			client.close();
-			server.close();
+			boolean finished = playVideos(listOfVideos, in, out, address);
+			
+			cleanUp(out, in, server, client);
 		}catch(Exception e)
 		{
 			e.printStackTrace();
 		}//end of catch
+		finally
+		{
+			streamServer.close();
+		}
 	}//end of main
+	
+	private static void cleanUp(BufferedWriter out, BufferedReader in, ServerSocket server, Socket client) throws IOException
+	{
+		out.write("quit\n");
+		out.flush();
+		in.close();
+		out.close();
+		client.close();
+		server.close();
+	}//end of cleanup
+	
+	
+	private static boolean playVideos(List<VideoData> videos, BufferedReader in, BufferedWriter out, InetAddress address) throws IOException
+	{
+		out.write(SharedData.videoPort + "\n");
+		out.flush();
+		for(VideoData video: videos)
+		{
+			streamServer = new StreamServer(address, video);
+			streamServer.stream();
+			long duration = streamServer.getDuration();
+			System.out.println("Duration " + duration);
+			String fromClient = "";
+			try
+			{
+				fromClient = in.readLine();
+				float position = (float)1.0; //streamServer.getPosition();
+				while((streamServer.getPosition() != position) && streamServer.isPlaying())
+				{
+					
+					position = streamServer.getPosition();
+					Thread.sleep(5 * 1000);
+					//System.out.println("Position " + streamServer.getPosition());
+				}
+				System.out.println("Position " + streamServer.getPosition());
+			}catch(Exception e) {e.printStackTrace();}
+			streamServer.close();
+			out.write("stop\n");
+			out.flush();
+		}//end of for loop
+		return true;
+	}//end of playVideos
 
 	public static List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)
 	{

@@ -58,10 +58,13 @@ public class StreamClient
 
 	public void init(String toPlay)
 	{
+		this.box = new JFrame("Playing from: " + toPlay);
 		this.box.setBounds(100,100, 800, 400);
 		this.box.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.toPlay = toPlay;
+		this.componentPlayer = new EmbeddedMediaPlayerComponent();
+		this.componentPlayer.addKeyListener(adapter);
 		this.box.setContentPane(this.componentPlayer);
 		this.box.addKeyListener(adapter);
 	}//end of init
@@ -74,16 +77,20 @@ public class StreamClient
 		this.componentPlayer.release();
 		this.box.setVisible(false);
 		this.box.dispose();
+		device.setFullScreenWindow(null);
+		inFullScreen = false;
 	}//end of close
 	
 	
 	public void playSomething() throws IOException
 	{
 		this.out.write("start\n");
+		this.out.flush();
 		this.box.setVisible(true);
 		this.mediaPlayer = this.componentPlayer.getMediaPlayer();
 		this.mediaPlayer.playMedia(toPlay);
-		//this.device.setFullScreenWindow(this.box);
+		this.device.setFullScreenWindow(this.box);
+		this.inFullScreen = true;
 	}//end of play something 
 	
 }//end of class
