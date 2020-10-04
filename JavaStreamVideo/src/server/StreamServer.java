@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -11,6 +12,7 @@ import shared_class.SharedData;
 import shared_class.VideoData;
 import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
+import uk.co.caprica.vlcj.player.TrackDescription;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.media.Media;
 
@@ -20,9 +22,11 @@ public class StreamServer extends Thread
 	String options = "";
 	public EmbeddedMediaPlayerComponent componentPlayer;
 	private EmbeddedMediaPlayer mediaPlayer;
+	List<TrackDescription> audioDescriptions;
 	JFrame box = new JFrame("Server");
 	VideoData video;
 	boolean paused = false;
+	int audioTrack = 0;
 	BufferedReader in;
 	BufferedWriter out;
 	
@@ -110,7 +114,8 @@ public class StreamServer extends Thread
 		//EmbeddedMediaPlayer mediaPlayer = prepareVideo(this.player.getMediaPlayer());
 		System.out.println(this.options);
 		this.mediaPlayer = this.componentPlayer.getMediaPlayer();
-		mediaPlayer.playMedia(this.video.videoPath, this.options);
+		this.mediaPlayer.playMedia(this.video.videoPath, this.options);
+		this.audioTrack = this.mediaPlayer.getAudioTrack();
 		if(this.video.subtitlePath != null)
 			mediaPlayer.setSubTitleFile(this.video.subtitlePath);
 		
@@ -120,25 +125,47 @@ public class StreamServer extends Thread
 	@Override
 	public void run()
 	{
-		while(true)
-		{
-			String cmd = "";
-			try {
-				switch((cmd = this.in.readLine().toUpperCase()))
-				{
-				case "PAUSE":
-					this.mediaPlayer.pause();
-					this.paused = true;
-					break;
-				case "PLAY":
-					this.mediaPlayer.play();
-					this.paused = false;
-				}//end of switch
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}//end of catch
-			System.out.println(cmd);
-		}//end of while loop
+		try {
+			while(true)
+			{
+				String cmd = "";
+				
+					switch((cmd = this.in.readLine().toUpperCase()))
+					{
+					case "PAUSE":
+						this.mediaPlayer.pause();
+						this.paused = true;
+						break;
+					case "PLAY":
+						this.mediaPlayer.play();
+						this.paused = false;
+						break;
+					case "CYCLEAUDIO":
+						System.out.println("Track Count = " + this.mediaPlayer.getAudioTrackCount());
+						this.audioDescriptions = this.mediaPlayer.getAudioDescriptions();
+						for(TrackDescription temp : this.audioDescriptions)
+						{
+							System.out.println(temp.description() + " ID: " + temp.id());
+						}
+						
+						audioTrack++;
+						if(audioTrack >= this.mediaPlayer.getAudioTrackCount())
+							audioTrack = 0;
+						this.mediaPlayer.setAudioTrack(this.audioDescriptions.get(audioTrack).id());
+						//this.mediaPlayer.mute();
+						//this.mediaPlayer.mute(false);
+						System.out.println("Audio index = " + audioTrack);
+						System.out.println("Audio Description: " + this.audioDescriptions.get(audioTrack).description());
+						System.out.println("Audio ID: " + this.audioDescriptions.get(audioTrack).id());
+						break;
+					}//end of switch
+				
+				System.out.println(cmd);
+			}//end of while loop
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			this.mediaPlayer.stop();
+			e.printStackTrace();
+		}//end of catch
 	}
 }//End of StreamVideo

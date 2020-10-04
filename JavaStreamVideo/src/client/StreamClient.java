@@ -2,9 +2,12 @@ package client;
 
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
@@ -84,6 +87,10 @@ public class StreamClient
 				audioDelay -= 50;
 				mediaPlayer.setAudioDelay(audioDelay);
 				break;
+			case 'a':
+			case 'A':
+				sendCommand("CycleAudio");
+				break;
 			}//end of switch statment
 			box.requestFocusInWindow();
 		}//end of keyReleased
@@ -107,6 +114,21 @@ public class StreamClient
 		this.box = new JFrame("Playing from: " + toPlay);
 		this.box.setBounds(100,100, 800, 400);
 		this.box.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		this.box.addFocusListener(new FocusListener()
+				{
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+						// TODO Auto-generated method stub
+						box.requestFocus();
+					}
+				});
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.toPlay = toPlay;
 		this.componentPlayer = new EmbeddedMediaPlayerComponent();
