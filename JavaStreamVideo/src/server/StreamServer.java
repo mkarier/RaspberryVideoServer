@@ -1,5 +1,8 @@
 package server;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.net.InetAddress;
 
 import javax.swing.JFrame;
@@ -19,10 +22,15 @@ public class StreamServer extends Thread
 	private EmbeddedMediaPlayer mediaPlayer;
 	JFrame box = new JFrame("Server");
 	VideoData video;
+	boolean paused = false;
+	BufferedReader in;
+	BufferedWriter out;
 	
-	StreamServer(InetAddress target, VideoData video)
+	StreamServer(InetAddress target, VideoData video, BufferedReader in , BufferedWriter out)
 	{
 		System.out.println(target.toString().substring(1));
+		this.in = in;
+		this.out = out;
 		this.target = target.toString().substring(1);
 		this.video = video;
 		getOptions();
@@ -87,6 +95,11 @@ public class StreamServer extends Thread
 		return this.mediaPlayer.getLength();
 	}
 	
+	public boolean isPaused()
+	{
+		return this.paused;
+	}//end of isPaused
+	
 	public boolean isPlaying()
 	{
 		return libvlc_state_t.libvlc_Playing == this.mediaPlayer.getMediaPlayerState();
@@ -102,4 +115,30 @@ public class StreamServer extends Thread
 			mediaPlayer.setSubTitleFile(this.video.subtitlePath);
 		
 	}//end of stream
+	
+	
+	@Override
+	public void run()
+	{
+		while(true)
+		{
+			String cmd = "";
+			try {
+				switch((cmd = this.in.readLine().toUpperCase()))
+				{
+				case "PAUSE":
+					this.mediaPlayer.pause();
+					this.paused = true;
+					break;
+				case "PLAY":
+					this.mediaPlayer.play();
+					this.paused = false;
+				}//end of switch
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch
+			System.out.println(cmd);
+		}//end of while loop
+	}
 }//End of StreamVideo

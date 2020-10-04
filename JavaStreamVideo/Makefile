@@ -1,6 +1,6 @@
 JarPath = './vlcj-3.12.1/vlcj-3.12.1.jar:./vlcj-3.12.1/jna-5.2.0.jar:./vlcj-3.12.1/jna-platform-5.2.0.jar:./vlcj-3.12.1/slf4j-api-1.7.25.jar:./vlcj-3.12.1/slf4j-nop-1.7.30.jar'
 JarClient = 'StreamClient'
-JarServer = 'VlcServerTest.jar'
+JarServer = 'VlcServerTest'
 PiJavaVLC:
 	javac -cp $(JarPath) src/client/*.java src/server/*.java src/shared_class/*.java -d ./bin/
 

@@ -20,9 +20,11 @@ public class StreamClient
 	public EmbeddedMediaPlayerComponent componentPlayer = new EmbeddedMediaPlayerComponent();
 	public EmbeddedMediaPlayer mediaPlayer;
 	public BufferedWriter out;
+	public long audioDelay = 50;
 	private boolean inFullScreen = false;
 	//public EmbeddedMediaPlayerComponent player;
 	String toPlay = "";
+	boolean pause = false;
 	
 	public StreamClient() {}
 
@@ -37,8 +39,27 @@ public class StreamClient
 		@Override
 		public void keyReleased(KeyEvent e) {
 			// TODO Auto-generated method stub
-			if(e.getKeyChar() == KeyEvent.VK_ENTER)
+			
+			
+			switch(e.getKeyChar())
 			{
+			case 'p':
+			case 'P':
+			case KeyEvent.VK_SPACE:
+				System.out.println("Going to pause or continue from pause");
+				if(!pause)
+				{
+					sendCommand("PAUSE");
+					System.out.println("Going to try and Pause");
+				}
+				else
+				{
+					sendCommand("PLAY");
+					System.out.println("Going to try and continue");
+				}
+				pause = !pause;
+				break;
+			case KeyEvent.VK_ENTER:
 				System.out.println("Enter Key was pressed and should change to a windowed mode");
 				if(inFullScreen)
 				{
@@ -52,10 +73,35 @@ public class StreamClient
 					device.setFullScreenWindow(box);
 					inFullScreen = true;
 				}
-			}//end of enter key pressed
+				break;
+			case 'j':
+			case 'J':
+				audioDelay += 50;
+				mediaPlayer.setAudioDelay(audioDelay);
+				break;
+			case 'l':
+			case 'L':
+				audioDelay -= 50;
+				mediaPlayer.setAudioDelay(audioDelay);
+				break;
+			}//end of switch statment
+			box.requestFocusInWindow();
 		}//end of keyReleased
 	};//end of keyAdapter
 
+	
+	public void sendCommand(String cmd)
+	{
+		try {
+			out.append(cmd);
+			out.newLine();
+			out.flush();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
 	public void init(String toPlay)
 	{
 		this.box = new JFrame("Playing from: " + toPlay);
@@ -77,8 +123,8 @@ public class StreamClient
 		this.componentPlayer.release();
 		this.box.setVisible(false);
 		this.box.dispose();
-		device.setFullScreenWindow(null);
-		inFullScreen = false;
+		//device.setFullScreenWindow(null);
+		//inFullScreen = false;
 	}//end of close
 	
 	
@@ -89,13 +135,14 @@ public class StreamClient
 		this.box.setVisible(true);
 		this.mediaPlayer = this.componentPlayer.getMediaPlayer();
 		this.mediaPlayer.playMedia(toPlay);
+		this.mediaPlayer.setAudioDelay(audioDelay);
 		if(this.inFullScreen)
 		{
 			this.device.setFullScreenWindow(this.box);
 			this.inFullScreen = true;
 		}
 		try {
-			Thread.sleep(10*1000);
+			Thread.sleep(1*1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

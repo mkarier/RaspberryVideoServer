@@ -107,7 +107,7 @@ public class ServerMain {
 		out.flush();
 		for(VideoData video: videos)
 		{
-			streamServer = new StreamServer(address, video);
+			streamServer = new StreamServer(address, video, in, out);
 			streamServer.stream();
 			long duration = streamServer.getDuration();
 			System.out.println("Duration " + duration);
@@ -117,20 +117,24 @@ public class ServerMain {
 				fromClient = in.readLine();
 				float position = (float)1.0; //streamServer.getPosition();
 				boolean firstTime = true;
-				while((streamServer.getPosition() != position) && streamServer.isPlaying())
+				streamServer.start();
+				while(
+						((streamServer.getPosition() != position) && streamServer.isPlaying())
+						|| streamServer.isPaused())
 				{
 					
 					position = streamServer.getPosition();
 					if(firstTime)
 					{
 						firstTime = false;
-						Thread.sleep(30 * 1000);
+						Thread.sleep(5 * 1000);
 					}
 					else
 						Thread.sleep(5 * 1000);
 					//System.out.println("Position " + streamServer.getPosition());
 				}
 				System.out.println("Position " + streamServer.getPosition());
+				streamServer.interrupt();
 			}catch(Exception e) {e.printStackTrace();}
 			streamServer.close();
 			out.write("stop\n");
