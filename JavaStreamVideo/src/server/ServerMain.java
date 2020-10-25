@@ -22,6 +22,7 @@ import com.sun.jna.NativeLibrary;
 import shared_class.SharedData;
 import shared_class.VideoData;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
+import uk.co.caprica.vlcj.player.TrackDescription;
 
 public class ServerMain {
 	
@@ -56,7 +57,7 @@ public class ServerMain {
 	
 	
 	private static StreamServer streamServer = null;
-	
+	private static int TIMEOUT = 5 * 1000;
 	public static void main(String[] args) 
 	{
 		try
@@ -74,6 +75,7 @@ public class ServerMain {
 			Socket client = server.accept();
 			InetAddress address = client.getInetAddress();
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			client.setSoTimeout(TIMEOUT);
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 
 			
@@ -116,21 +118,15 @@ public class ServerMain {
 			{
 				fromClient = in.readLine();
 				float position = (float)1.0; //streamServer.getPosition();
-				boolean firstTime = true;
-				streamServer.start();
+				//streamServer.start();
 				while(
 						((streamServer.getPosition() != position) && streamServer.isPlaying())
 						|| streamServer.isPaused())
 				{
 					
 					position = streamServer.getPosition();
-					if(firstTime)
-					{
-						firstTime = false;
-						Thread.sleep(5 * 1000);
-					}
-					else
-						Thread.sleep(5 * 1000);
+					checkClientInput(in, streamServer);
+					
 					//System.out.println("Position " + streamServer.getPosition());
 				}
 				System.out.println("Position " + streamServer.getPosition());
@@ -142,6 +138,32 @@ public class ServerMain {
 		}//end of for loop
 		return true;
 	}//end of playVideos
+	
+	
+	public static void checkClientInput(BufferedReader in, StreamServer server)
+	{
+		String cmd = "";
+		
+		try {
+			switch((cmd = in.readLine().toUpperCase()))
+			{
+			case "PAUSE":
+				server.pause();
+				break;
+			case "PLAY":
+				server.play();
+				break;
+			case "CYCLEAUDIO":
+				server.cycleAudio();
+				break;
+			}
+			System.out.println(cmd);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		}//end of switch	
+	}
+	
 
 	public static List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)
 	{

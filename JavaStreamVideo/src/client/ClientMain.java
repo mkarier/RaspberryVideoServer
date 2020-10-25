@@ -30,6 +30,7 @@ public class ClientMain
 			String toPlay = "udp://@:" + videoPort;
 			String fromServer = "continue";
 			player = new StreamClient(out);
+			FloatMenu menu = new FloatMenu(player);
 			while(!fromServer.contains("quit"))
 			{
 				player.init(toPlay);
@@ -41,7 +42,7 @@ public class ClientMain
 				System.out.println("Player was closed");
 			}//end of while
 			socket.close();
-			
+			menu.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

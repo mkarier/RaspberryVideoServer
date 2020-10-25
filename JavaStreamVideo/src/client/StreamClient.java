@@ -36,7 +36,12 @@ public class StreamClient
 		this.device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		this.out = out;
 	}//end of constructor
-	 
+	
+	public KeyAdapter getAdapter()
+	{
+		return this.adapter;
+	}//end of getAdapter()
+	
 	private KeyAdapter adapter = new KeyAdapter()
 	{
 		@Override
@@ -92,7 +97,7 @@ public class StreamClient
 				sendCommand("CycleAudio");
 				break;
 			}//end of switch statment
-			box.requestFocusInWindow();
+			//box.requestFocusInWindow();
 		}//end of keyReleased
 	};//end of keyAdapter
 

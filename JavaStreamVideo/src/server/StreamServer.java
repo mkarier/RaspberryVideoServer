@@ -104,6 +104,38 @@ public class StreamServer extends Thread
 		return this.paused;
 	}//end of isPaused
 	
+	public void pause()
+	{
+		this.mediaPlayer.pause();
+		this.paused = true;
+	}
+	
+	public void play()
+	{
+		this.mediaPlayer.play();
+		this.paused = false;
+	}
+	
+	public void cycleAudio()
+	{
+		System.out.println("Track Count = " + this.mediaPlayer.getAudioTrackCount());
+		this.audioDescriptions = this.mediaPlayer.getAudioDescriptions();
+		for(TrackDescription temp : this.audioDescriptions)
+		{
+			System.out.println(temp.description() + " ID: " + temp.id());
+		}
+		
+		audioTrack++;
+		if(audioTrack >= this.mediaPlayer.getAudioTrackCount())
+			audioTrack = 0;
+		this.mediaPlayer.setAudioTrack(this.audioDescriptions.get(audioTrack).id());
+		//this.mediaPlayer.mute();
+		//this.mediaPlayer.mute(false);
+		System.out.println("Audio index = " + audioTrack);
+		System.out.println("Audio Description: " + this.audioDescriptions.get(audioTrack).description());
+		System.out.println("Audio ID: " + this.audioDescriptions.get(audioTrack).id());
+	}//end of cycleAudio
+	
 	public boolean isPlaying()
 	{
 		return libvlc_state_t.libvlc_Playing == this.mediaPlayer.getMediaPlayerState();
