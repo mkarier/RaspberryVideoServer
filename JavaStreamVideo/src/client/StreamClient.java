@@ -131,7 +131,7 @@ public class StreamClient
 					@Override
 					public void focusLost(FocusEvent e) {
 						// TODO Auto-generated method stub
-						box.requestFocus();
+						//box.requestFocus();
 					}
 				});
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

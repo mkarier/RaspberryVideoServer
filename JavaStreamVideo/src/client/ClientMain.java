@@ -13,7 +13,7 @@ import shared_class.SharedData;
 
 public class ClientMain 
 {
-	public static String host = "mkarier-desktop";
+	public static String host = "LinuxBox";
 	public static void main(String[] args) 
 	{
 		StreamClient player = null;
