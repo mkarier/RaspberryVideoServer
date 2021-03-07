@@ -92,6 +92,14 @@ public class ServerMain {
 		}
 	}//end of main
 	
+	/**
+	 * This method is at the end of the program to clean up stuff. 
+	 * @param out This is the writer to the client
+	 * @param in this read in from the client
+	 * @param server this is Socket that connects to socket
+	 * @param client 
+	 * @throws IOException
+	 */
 	private static void cleanUp(BufferedWriter out, BufferedReader in, ServerSocket server, Socket client) throws IOException
 	{
 		out.write("quit\n");
@@ -140,7 +148,7 @@ public class ServerMain {
 	}//end of playVideos
 	
 	
-	public static void checkClientInput(BufferedReader in, StreamServer server)
+	public static void checkClientInput(BufferedReader in, StreamServer server) throws InterruptedException
 	{
 		String cmd = "";
 		

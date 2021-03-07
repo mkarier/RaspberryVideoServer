@@ -13,7 +13,7 @@ import shared_class.SharedData;
 
 public class ClientMain 
 {
-	public static String host = "LinuxBox";
+	public static String host = "streamserver.local";
 	public static void main(String[] args) 
 	{
 		StreamClient player = null;
@@ -22,12 +22,16 @@ public class ClientMain
 				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
 			else
 				System.out.println("OS = linux");
-			Socket socket = new Socket(host, SharedData.comPort);
+			Socket socket = null;
+			if(args.length >= 1)
+				socket = new Socket(args[0], SharedData.comPort);
+			else
+				socket = new Socket(host, SharedData.comPort);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			String videoPort = in.readLine();
 			System.out.println("video Port = " + videoPort);
-			String toPlay = "udp://@:" + videoPort;
+			String toPlay = SharedData.access + "://@:" + videoPort;
 			String fromServer = "continue";
 			player = new StreamClient(out);
 			FloatMenu menu = new FloatMenu(player);

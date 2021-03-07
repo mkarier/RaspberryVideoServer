@@ -2,7 +2,7 @@ JarPath = './vlcj-3.12.1/vlcj-3.12.1.jar:./vlcj-3.12.1/jna-5.2.0.jar:./vlcj-3.12
 JarClient = 'StreamClient'
 JarServer = 'VlcServerTest'
 PiJavaVLC:
-	javac -cp $(JarPath) src/client/*.java src/server/*.java src/shared_class/*.java -d ./bin/
+	javac -source 8 -target 8 -cp $(JarPath) src/client/*.java src/server/*.java src/shared_class/*.java -d ./bin/
 
 BuildClient.o: PiJavaVLC
 	jar cmvf ./ClientManifest.txt $(JarClient).jar ./org/ 

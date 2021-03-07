@@ -84,13 +84,11 @@ public class StreamClient
 				break;
 			case 'j':
 			case 'J':
-				audioDelay += 50;
-				mediaPlayer.setAudioDelay(audioDelay);
+				sendCommand("SYNCTRACKFORWARD");
 				break;
 			case 'l':
 			case 'L':
-				audioDelay -= 50;
-				mediaPlayer.setAudioDelay(audioDelay);
+				sendCommand("SYNCTRACKBACKWARD");
 				break;
 			case 'a':
 			case 'A':

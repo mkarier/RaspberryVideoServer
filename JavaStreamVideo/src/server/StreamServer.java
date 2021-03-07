@@ -27,6 +27,7 @@ public class StreamServer extends Thread
 	VideoData video;
 	boolean paused = false;
 	int audioTrack = 0;
+	int audioDelay = 0;
 	BufferedReader in;
 	BufferedWriter out;
 	
@@ -50,7 +51,7 @@ public class StreamServer extends Thread
 	public void getOptions()
 	{
 		String start = "sout=#";
-		String standard = String.format("standard{access=udp,mux=ts,dst=%s:%d}", target, SharedData.videoPort);
+		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
 		String transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
 		String transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 		if(this.video.hasSubtitles)
@@ -62,7 +63,7 @@ public class StreamServer extends Thread
 	public EmbeddedMediaPlayer prepareVideo(EmbeddedMediaPlayer mediaPlayer)
 	{
 		String start = "sout=#";
-		String standard = String.format("standard{access=udp,mux=ts,dst=%s:%d}", target, SharedData.videoPort);
+		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
 		String transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
 		String transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 		if(video.hasSubtitles)
@@ -110,7 +111,7 @@ public class StreamServer extends Thread
 		this.paused = true;
 	}
 	
-	public void play()
+	public void play() throws InterruptedException
 	{
 		this.mediaPlayer.play();
 		this.paused = false;
@@ -189,6 +190,16 @@ public class StreamServer extends Thread
 						System.out.println("Audio index = " + audioTrack);
 						System.out.println("Audio Description: " + this.audioDescriptions.get(audioTrack).description());
 						System.out.println("Audio ID: " + this.audioDescriptions.get(audioTrack).id());
+						break;
+					case "SYNCTRACKFORWARD":
+						this.audioDelay += 50;
+						this.mediaPlayer.setAudioDelay(audioDelay);
+						System.out.println("Audio Delay = " + this.audioDelay);
+						break;
+					case "SYNCTRACKBACKWARD":
+						this.audioDelay -= 50;
+						this.mediaPlayer.setAudioDelay(audioDelay);
+						System.out.println("Audio Delay = " + this.audioDelay);
 						break;
 					}//end of switch
 				
