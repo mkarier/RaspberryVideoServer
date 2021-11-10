@@ -13,8 +13,9 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 
-import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+
 
 public class StreamClient 
 {
@@ -51,8 +52,6 @@ public class StreamClient
 			
 			switch(e.getKeyChar())
 			{
-			case 'p':
-			case 'P':
 			case KeyEvent.VK_SPACE:
 				System.out.println("Going to pause or continue from pause");
 				if(!pause)
@@ -93,6 +92,13 @@ public class StreamClient
 			case 'a':
 			case 'A':
 				sendCommand("CycleAudio");
+			case'n':
+			case'N':
+				sendCommand("SkipChapter");
+				break;
+			case 'p':
+			case 'P':
+				sendCommand("PreviousChapter");
 				break;
 			}//end of switch statment
 			//box.requestFocusInWindow();
@@ -143,7 +149,7 @@ public class StreamClient
 	
 	public void close()
 	{
-		this.mediaPlayer.stop();
+		this.mediaPlayer.controls().stop();
 		this.mediaPlayer.release();
 		this.componentPlayer.release();
 		this.box.setVisible(false);
@@ -158,9 +164,9 @@ public class StreamClient
 		this.out.write("start\n");
 		this.out.flush();
 		this.box.setVisible(true);
-		this.mediaPlayer = this.componentPlayer.getMediaPlayer();
-		this.mediaPlayer.playMedia(toPlay);
-		this.mediaPlayer.setAudioDelay(audioDelay);
+		this.mediaPlayer = (EmbeddedMediaPlayer) this.componentPlayer.mediaPlayer();
+		this.mediaPlayer.media().play(toPlay);
+		//this.mediaPlayer.setAudioDelay(audioDelay);
 		if(this.inFullScreen)
 		{
 			this.device.setFullScreenWindow(this.box);

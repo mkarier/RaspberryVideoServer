@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 import com.sun.jna.NativeLibrary;
 
@@ -13,7 +14,7 @@ import shared_class.SharedData;
 
 public class ClientMain 
 {
-	public static String host = "streamserver.local";
+	public static String host = "localhost";
 	public static void main(String[] args) 
 	{
 		StreamClient player = null;
@@ -23,9 +24,9 @@ public class ClientMain
 			else
 				System.out.println("OS = linux");
 			Socket socket = null;
-			if(args.length >= 1)
+			/*if(args.length >= 1)
 				socket = new Socket(args[0], SharedData.comPort);
-			else
+			else*/
 				socket = new Socket(host, SharedData.comPort);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -37,22 +38,28 @@ public class ClientMain
 			FloatMenu menu = new FloatMenu(player);
 			while(!fromServer.contains("quit"))
 			{
+				try
+				{
 				player.init(toPlay);
+				TimeUnit.SECONDS.sleep(1);
 				System.out.println("initialized the player");
 				player.playSomething();
 				System.out.println("Starting to play");
 				fromServer = in.readLine();//TODO: make this better. Right now it is waiting for the server to write 'stop' before moving on
 				player.close();
 				System.out.println("Player was closed");
+				}finally {TimeUnit.SECONDS.wait(3 *1000);}
 			}//end of while
 			socket.close();
 			menu.close();
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		catch(Throwable t) {t.printStackTrace();}
 		finally
-		{
+		{			
+			System.out.println("Reached Finally");
 			player.close();
 		}
 	}//end of main

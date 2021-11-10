@@ -17,12 +17,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 
 import shared_class.SharedData;
 import shared_class.VideoData;
-import uk.co.caprica.vlcj.discovery.NativeDiscovery;
-import uk.co.caprica.vlcj.player.TrackDescription;
+import uk.co.caprica.vlcj.binding.RuntimeUtil;
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
+import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
 
 public class ServerMain {
 	
@@ -62,8 +65,15 @@ public class ServerMain {
 	{
 		try
 		{
-			if(System.getProperty("os.name").contains("Windows"));
-				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
+		    //System.out.println(LibVlc.INSTANCE.libvlc_get_version());
+			if(System.getProperty("os.name").contains("Windows"))
+			{
+				System.out.println(RuntimeUtil.getLibVlcLibraryName());
+				NativeLibrary.addSearchPath(RuntimeUtil.getLibVlcLibraryName(), SharedData.vlcPath);
+			}
+			else
+				System.out.println("OS = linux");
+			new NativeDiscovery().discover();
 			ArrayList<String> videoTypes = new ArrayList<String>();
 			videoTypes.addAll(Arrays.asList(TypesOfVideos));
 			SharedData options = new SharedData();
@@ -82,10 +92,14 @@ public class ServerMain {
 			boolean finished = playVideos(listOfVideos, in, out, address);
 			
 			cleanUp(out, in, server, client);
-		}catch(Exception e)
+		}catch(Exception e )
 		{
 			e.printStackTrace();
 		}//end of catch
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
 		finally
 		{
 			streamServer.close();
@@ -113,32 +127,39 @@ public class ServerMain {
 	
 	private static boolean playVideos(List<VideoData> videos, BufferedReader in, BufferedWriter out, InetAddress address) throws IOException
 	{
-		out.write(SharedData.videoPort + "\n");
-		out.flush();
+		
 		for(VideoData video: videos)
 		{
 			streamServer = new StreamServer(address, video, in, out);
 			streamServer.stream();
-			long duration = streamServer.getDuration();
+			out.write(SharedData.videoPort + "\n");
+			out.flush();
+			long duration = 1000l;// streamServer.getDuration();
+			long currentTime = streamServer.getCurrentTime();
 			System.out.println("Duration " + duration);
 			String fromClient = "";
 			try
 			{
-				fromClient = in.readLine();
-				float position = (float)1.0; //streamServer.getPosition();
+				fromClient = in.readLine();				
 				//streamServer.start();
-				while(
-						((streamServer.getPosition() != position) && streamServer.isPlaying())
-						|| streamServer.isPaused())
+				while(currentTime != duration)
 				{
 					
-					position = streamServer.getPosition();
+					//position = streamServer.getPosition();
+					currentTime = streamServer.getCurrentTime();					
+					streamServer.getDuration();
+					System.out.println(currentTime + "/" + streamServer.getDuration());
 					checkClientInput(in, streamServer);
 					
 					//System.out.println("Position " + streamServer.getPosition());
 				}
-				System.out.println("Position " + streamServer.getPosition());
-				streamServer.interrupt();
+				/*while(true)
+				{
+					System.out.println("Position " + streamServer.getCurrentTime());
+					long duration = streamServer.getDuration();
+					System.out.println("Duration " + duration);
+				}*/
+				//streamServer.interrupt();
 			}catch(Exception e) {e.printStackTrace();}
 			streamServer.close();
 			out.write("stop\n");
@@ -163,6 +184,9 @@ public class ServerMain {
 				break;
 			case "CYCLEAUDIO":
 				server.cycleAudio();
+				break;
+			case "SKIPCHAPTER":
+				server.skipChapter();
 				break;
 			}
 			System.out.println(cmd);
@@ -220,12 +244,16 @@ public class ServerMain {
 	
 	private static boolean checkIfSubtitleFile(String arg) {
 		// TODO Auto-generated method stub
+		if(arg.lastIndexOf(".") == -1)
+			return false;
 		String extension = arg.substring(arg.lastIndexOf("."));
 		return extension.contains("srt") || extension.contains("SRT");
 	}
 
 	public static boolean checkIfVideo(String input, ArrayList<String> videoTypes)
 	{
+		if(input.lastIndexOf(".") == -1)
+			return false;
 		String extension = input.substring(input.lastIndexOf("."));
 		return videoTypes.contains(extension);
 	}//end of check if Video

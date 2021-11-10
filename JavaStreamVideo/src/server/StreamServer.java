@@ -10,14 +10,19 @@ import javax.swing.JFrame;
 
 import shared_class.SharedData;
 import shared_class.VideoData;
-import uk.co.caprica.vlcj.binding.internal.libvlc_state_t;
-import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
-import uk.co.caprica.vlcj.player.TrackDescription;
+import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
+import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
+import uk.co.caprica.vlcj.player.base.TrackDescription;
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
-import uk.co.caprica.vlcj.player.media.Media;
 
 public class StreamServer extends Thread
 {
+	String transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
+	String transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForNoSub = "transcode{vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForSub = "transcode{vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
+	//String transcode = "vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none";
 	String target = "";
 	String options = "";
 	public EmbeddedMediaPlayerComponent componentPlayer;
@@ -40,7 +45,10 @@ public class StreamServer extends Thread
 		this.video = video;
 		getOptions();
 		System.out.println("Path to video " + video.videoPath);
-		this.componentPlayer = new EmbeddedMediaPlayerComponent();
+		try
+		{			
+			this.componentPlayer = new EmbeddedMediaPlayerComponent();
+		}catch(Exception e) {e.printStackTrace();}
 		this.box.setBounds(100,100, 800, 400);
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.box.setContentPane(this.componentPlayer);
@@ -52,8 +60,6 @@ public class StreamServer extends Thread
 	{
 		String start = "sout=#";
 		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
-		String transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
-		String transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 		if(this.video.hasSubtitles)
 			this.options = start + transcodeForSub + standard;
 		else
@@ -64,23 +70,21 @@ public class StreamServer extends Thread
 	{
 		String start = "sout=#";
 		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
-		String transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
-		String transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 		if(video.hasSubtitles)
-		{
-			mediaPlayer.prepareMedia(this.video.videoPath, start, transcodeForSub, standard);
+		{		
+			mediaPlayer.media().play(this.video.videoPath, start, transcodeForSub, standard);
 			if(this.video.subtitlePath != null)
-				mediaPlayer.setSubTitleFile(this.video.subtitlePath);
+				mediaPlayer.subpictures().setSubTitleFile(this.video.subtitlePath);
 		}
 		else
-			mediaPlayer.prepareMedia(this.video.videoPath, start, transcodeForNoSub, standard);
+			mediaPlayer.media().play(this.video.videoPath, start, transcodeForNoSub, standard);
 		return mediaPlayer;
 	}//end of get Options
 	
 	
 	public void close()
-	{
-		this.mediaPlayer.stop();
+	{		
+		this.mediaPlayer.controls().stop();
 		this.mediaPlayer.release();
 		this.componentPlayer.release();
 		this.box.setVisible(false);
@@ -88,16 +92,21 @@ public class StreamServer extends Thread
 	}//end of close
 	
 	public float getPosition() {
-		return this.mediaPlayer.getPosition();
+		return this.mediaPlayer.status().position();
 	}//end of getPosition
 	
 	public long getCurrentTime()
 	{
-		return this.mediaPlayer.getTime();
+		return this.mediaPlayer.status().time();
 	}
 	
 	public long getDuration() {
-		return this.mediaPlayer.getLength();
+		return this.mediaPlayer.status().length();
+	}
+	
+	public void skipChapter()
+	{
+		this.mediaPlayer.controls().skipTime(30 * 1000);
 	}
 	
 	public boolean isPaused()
@@ -107,29 +116,29 @@ public class StreamServer extends Thread
 	
 	public void pause()
 	{
-		this.mediaPlayer.pause();
+		this.mediaPlayer.controls().pause();
 		this.paused = true;
 	}
 	
 	public void play() throws InterruptedException
 	{
-		this.mediaPlayer.play();
+		this.mediaPlayer.controls().pause();
 		this.paused = false;
 	}
 	
 	public void cycleAudio()
 	{
-		System.out.println("Track Count = " + this.mediaPlayer.getAudioTrackCount());
-		this.audioDescriptions = this.mediaPlayer.getAudioDescriptions();
+		System.out.println("Track Count = " + this.mediaPlayer.audio().trackCount());
+		this.audioDescriptions = this.mediaPlayer.audio().trackDescriptions();
 		for(TrackDescription temp : this.audioDescriptions)
 		{
 			System.out.println(temp.description() + " ID: " + temp.id());
 		}
 		
 		audioTrack++;
-		if(audioTrack >= this.mediaPlayer.getAudioTrackCount())
+		if(audioTrack >= this.mediaPlayer.audio().trackCount())
 			audioTrack = 0;
-		this.mediaPlayer.setAudioTrack(this.audioDescriptions.get(audioTrack).id());
+		this.mediaPlayer.audio().setTrack(this.audioDescriptions.get(audioTrack).id());
 		//this.mediaPlayer.mute();
 		//this.mediaPlayer.mute(false);
 		System.out.println("Audio index = " + audioTrack);
@@ -139,18 +148,18 @@ public class StreamServer extends Thread
 	
 	public boolean isPlaying()
 	{
-		return libvlc_state_t.libvlc_Playing == this.mediaPlayer.getMediaPlayerState();
+		return this.mediaPlayer.status().isPlaying();
 	}//end of is playing
 	
 	public void stream()
 	{
 		//EmbeddedMediaPlayer mediaPlayer = prepareVideo(this.player.getMediaPlayer());
 		System.out.println(this.options);
-		this.mediaPlayer = this.componentPlayer.getMediaPlayer();
-		this.mediaPlayer.playMedia(this.video.videoPath, this.options);
-		this.audioTrack = this.mediaPlayer.getAudioTrack();
+		this.mediaPlayer = this.componentPlayer.mediaPlayer();
+		this.mediaPlayer.media().play(this.video.videoPath, this.options);
+		this.audioTrack = this.mediaPlayer.audio().track();
 		if(this.video.subtitlePath != null)
-			mediaPlayer.setSubTitleFile(this.video.subtitlePath);
+			mediaPlayer.subpictures().setSubTitleFile(this.video.subtitlePath);
 		
 	}//end of stream
 	
@@ -166,25 +175,25 @@ public class StreamServer extends Thread
 					switch((cmd = this.in.readLine().toUpperCase()))
 					{
 					case "PAUSE":
-						this.mediaPlayer.pause();
+						this.mediaPlayer.controls().pause();
 						this.paused = true;
 						break;
 					case "PLAY":
-						this.mediaPlayer.play();
+						this.mediaPlayer.controls().start();
 						this.paused = false;
 						break;
 					case "CYCLEAUDIO":
-						System.out.println("Track Count = " + this.mediaPlayer.getAudioTrackCount());
-						this.audioDescriptions = this.mediaPlayer.getAudioDescriptions();
+						System.out.println("Track Count = " + this.mediaPlayer.audio().trackCount());
+						this.audioDescriptions = this.mediaPlayer.audio().trackDescriptions();
 						for(TrackDescription temp : this.audioDescriptions)
 						{
 							System.out.println(temp.description() + " ID: " + temp.id());
 						}
 						
 						audioTrack++;
-						if(audioTrack >= this.mediaPlayer.getAudioTrackCount())
+						if(audioTrack >= this.mediaPlayer.audio().trackCount())
 							audioTrack = 0;
-						this.mediaPlayer.setAudioTrack(this.audioDescriptions.get(audioTrack).id());
+						this.mediaPlayer.audio().setTrack(this.audioDescriptions.get(audioTrack).id());
 						//this.mediaPlayer.mute();
 						//this.mediaPlayer.mute(false);
 						System.out.println("Audio index = " + audioTrack);
@@ -193,21 +202,26 @@ public class StreamServer extends Thread
 						break;
 					case "SYNCTRACKFORWARD":
 						this.audioDelay += 50;
-						this.mediaPlayer.setAudioDelay(audioDelay);
+						this.mediaPlayer.audio().setDelay(audioDelay);
 						System.out.println("Audio Delay = " + this.audioDelay);
 						break;
 					case "SYNCTRACKBACKWARD":
 						this.audioDelay -= 50;
-						this.mediaPlayer.setAudioDelay(audioDelay);
+						this.mediaPlayer.audio().setDelay(audioDelay);
 						System.out.println("Audio Delay = " + this.audioDelay);
 						break;
+					case "SKIPCHAPTER":
+						this.mediaPlayer.chapters().next();
+						break;
+					case "PREVIOUSCHAPTER":
+						this.mediaPlayer.chapters().previous();
 					}//end of switch
 				
 				System.out.println(cmd);
 			}//end of while loop
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			this.mediaPlayer.stop();
+			this.mediaPlayer.controls().stop();
 			e.printStackTrace();
 		}//end of catch
 	}

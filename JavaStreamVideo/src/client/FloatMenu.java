@@ -12,11 +12,12 @@ public class FloatMenu
 	public FloatMenu(StreamClient client)
 	{
 		this.box = new JFrame("Floating Menu");
-		String cmd = "<html><p>'p' or Spacebar to pause the movie</br>"
-				+ "Enter should change windowed mode</br>"
-				+ "j for +50 Audio Delay</br>"
-				+ "l for -50 Audio Delay</br>"
-				+ "a for Audio Cycle</br></p></html>";
+		String cmd = "<html><p>Spacebar to pause the movie</br>"
+				+ "Enter should change windowed mode<br>"
+				+ "j for +50 Audio Delay<br>"
+				+ "l for -50 Audio Delay<br>"
+				+ "a for Audio Cycle<br>"
+				+ "n for skip chapter</p></html>";
 		this.commands = new JLabel(cmd);
 		this.commands.addKeyListener(client.getAdapter());
 		this.box.addKeyListener(client.getAdapter());
