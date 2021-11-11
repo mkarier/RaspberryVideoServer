@@ -140,9 +140,9 @@ public class ServerMain {
 			String fromClient = "";
 			try
 			{
-				fromClient = in.readLine();				
+				//fromClient = in.readLine();				
 				//streamServer.start();
-				while(currentTime != duration)
+				while(currentTime != -1)
 				{
 					
 					//position = streamServer.getPosition();
@@ -159,7 +159,7 @@ public class ServerMain {
 					long duration = streamServer.getDuration();
 					System.out.println("Duration " + duration);
 				}*/
-				//streamServer.interrupt();
+				streamServer.interrupt();
 			}catch(Exception e) {e.printStackTrace();}
 			streamServer.close();
 			out.write("stop\n");
@@ -169,7 +169,7 @@ public class ServerMain {
 	}//end of playVideos
 	
 	
-	public static void checkClientInput(BufferedReader in, StreamServer server) throws InterruptedException
+	public static void checkClientInput(BufferedReader in, StreamServer server)
 	{
 		String cmd = "";
 		
@@ -190,7 +190,7 @@ public class ServerMain {
 				break;
 			}
 			System.out.println(cmd);
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 		}//end of switch	

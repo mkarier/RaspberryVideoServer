@@ -84,9 +84,9 @@ public class StreamServer extends Thread
 	
 	public void close()
 	{		
-		this.mediaPlayer.controls().stop();
+		//this.mediaPlayer.controls().stop();
 		this.mediaPlayer.release();
-		this.componentPlayer.release();
+		//this.componentPlayer.release();
 		this.box.setVisible(false);
 		this.box.dispose();
 	}//end of close

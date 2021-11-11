@@ -24,9 +24,9 @@ public class ClientMain
 			else
 				System.out.println("OS = linux");
 			Socket socket = null;
-			/*if(args.length >= 1)
+			if(args.length >= 1)
 				socket = new Socket(args[0], SharedData.comPort);
-			else*/
+			else
 				socket = new Socket(host, SharedData.comPort);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -41,15 +41,16 @@ public class ClientMain
 				try
 				{
 				player.init(toPlay);
-				TimeUnit.SECONDS.sleep(1);
+				TimeUnit.SECONDS.sleep(2);
 				System.out.println("initialized the player");
 				player.playSomething();
 				System.out.println("Starting to play");
 				fromServer = in.readLine();//TODO: make this better. Right now it is waiting for the server to write 'stop' before moving on
-				player.close();
+				//player.close();
 				System.out.println("Player was closed");
-				}finally {TimeUnit.SECONDS.wait(3 *1000);}
+				}finally {TimeUnit.SECONDS.sleep(3 *1000);}
 			}//end of while
+			player.close();
 			socket.close();
 			menu.close();
 		} catch (IOException | InterruptedException e) {
