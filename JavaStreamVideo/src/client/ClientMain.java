@@ -35,12 +35,13 @@ public class ClientMain
 			String toPlay = SharedData.access + "://@:" + videoPort;
 			String fromServer = "continue";
 			player = new StreamClient(out);
+			player.init(toPlay);
 			FloatMenu menu = new FloatMenu(player);
 			while(!fromServer.contains("quit"))
 			{
 				try
 				{
-				player.init(toPlay);
+				
 				TimeUnit.SECONDS.sleep(2);
 				System.out.println("initialized the player");
 				player.playSomething();
