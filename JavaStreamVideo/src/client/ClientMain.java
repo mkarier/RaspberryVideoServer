@@ -35,7 +35,7 @@ public class ClientMain
 			String toPlay = SharedData.access + "://@:" + videoPort;
 			String fromServer = "continue";
 			player = new StreamClient(out);
-			player.init(toPlay);
+			
 			FloatMenu menu = new FloatMenu(player);
 			while(!fromServer.contains("quit"))
 			{
@@ -43,11 +43,12 @@ public class ClientMain
 				{
 				
 				TimeUnit.SECONDS.sleep(2);
+				player.init(toPlay);
 				System.out.println("initialized the player");
 				player.playSomething();
 				System.out.println("Starting to play");
 				fromServer = in.readLine();//TODO: make this better. Right now it is waiting for the server to write 'stop' before moving on
-				//player.close();
+				player.close();
 				System.out.println("Player was closed");
 				}finally {TimeUnit.SECONDS.sleep(3 *1000);}
 			}//end of while

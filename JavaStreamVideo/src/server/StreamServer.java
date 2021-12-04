@@ -12,9 +12,12 @@ import shared_class.SharedData;
 import shared_class.VideoData;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.TrackDescription;
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaListPlayerComponent;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import uk.co.caprica.vlcj.player.list.MediaListPlayer;
 
 public class StreamServer extends Thread
 {
@@ -25,8 +28,9 @@ public class StreamServer extends Thread
 	//String transcode = "vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none";
 	String target = "";
 	String options = "";
-	public EmbeddedMediaPlayerComponent componentPlayer;
-	private EmbeddedMediaPlayer mediaPlayer;
+	public EmbeddedMediaListPlayerComponent componentPlayer;
+	//private MediaPlayer mediaPlayer;
+	private MediaListPlayer listPlayer;
 	List<TrackDescription> audioDescriptions;
 	JFrame box = new JFrame("Server");
 	VideoData video;
@@ -47,7 +51,8 @@ public class StreamServer extends Thread
 		System.out.println("Path to video " + video.videoPath);
 		try
 		{			
-			this.componentPlayer = new EmbeddedMediaPlayerComponent();
+			this.componentPlayer = new EmbeddedMediaListPlayerComponent();
+			this.listPlayer = this.componentPlayer.mediaListPlayer();
 		}catch(Exception e) {e.printStackTrace();}
 		this.box.setBounds(100,100, 800, 400);
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -55,6 +60,17 @@ public class StreamServer extends Thread
 		this.box.setVisible(true);
 		this.box.setState(JFrame.ICONIFIED);
 	}
+	
+	public void addVideos(List<VideoData> videos)
+	{
+		
+		for(VideoData data: videos)
+		{
+			this.video = data;
+			this.getOptions();
+			this.listPlayer.list().media().add(this.video.videoPath, this.options);
+		}//end of for loop 
+	}//end of addVideos
 	
 	public void getOptions()
 	{
@@ -85,28 +101,38 @@ public class StreamServer extends Thread
 	public void close()
 	{		
 		//this.mediaPlayer.controls().stop();
-		this.mediaPlayer.release();
+		this.listPlayer.release();
 		//this.componentPlayer.release();
 		this.box.setVisible(false);
 		this.box.dispose();
 	}//end of close
 	
 	public float getPosition() {
-		return this.mediaPlayer.status().position();
+		return this.componentPlayer.mediaPlayer().status().position();
 	}//end of getPosition
 	
 	public long getCurrentTime()
 	{
-		return this.mediaPlayer.status().time();
-	}
+		try
+		{
+			return this.componentPlayer.mediaPlayer().status().time();
+		}catch(NullPointerException e){
+			e.printStackTrace();
+			return -20l;
+		}
+	}//end of getCurrentTime
 	
 	public long getDuration() {
-		return this.mediaPlayer.status().length();
-	}
+		try
+		{
+			return this.componentPlayer.mediaPlayer().status().length();			
+		}catch(NullPointerException e){e.printStackTrace();
+		return -20l;}
+	}//end of getDuration
 	
 	public void skipChapter()
 	{
-		this.mediaPlayer.controls().skipTime(30 * 1000);
+		this.componentPlayer.mediaPlayer().controls().skipTime(30 * 1000);
 	}
 	
 	public boolean isPaused()
@@ -116,19 +142,19 @@ public class StreamServer extends Thread
 	
 	public void pause()
 	{
-		this.mediaPlayer.controls().pause();
+		this.listPlayer.controls().pause();
 		this.paused = true;
 	}
 	
-	public void play() throws InterruptedException
+	public void play()
 	{
-		this.mediaPlayer.controls().pause();
+		this.listPlayer.controls().play();
 		this.paused = false;
 	}
 	
 	public void cycleAudio()
 	{
-		System.out.println("Track Count = " + this.mediaPlayer.audio().trackCount());
+		/*System.out.println("Track Count = " + this.listPlayer.audiot);
 		this.audioDescriptions = this.mediaPlayer.audio().trackDescriptions();
 		for(TrackDescription temp : this.audioDescriptions)
 		{
@@ -143,86 +169,69 @@ public class StreamServer extends Thread
 		//this.mediaPlayer.mute(false);
 		System.out.println("Audio index = " + audioTrack);
 		System.out.println("Audio Description: " + this.audioDescriptions.get(audioTrack).description());
-		System.out.println("Audio ID: " + this.audioDescriptions.get(audioTrack).id());
+		System.out.println("Audio ID: " + this.audioDescriptions.get(audioTrack).id());//*/
 	}//end of cycleAudio
 	
 	public boolean isPlaying()
 	{
-		return this.mediaPlayer.status().isPlaying();
+		return this.listPlayer.status().isPlaying();
 	}//end of is playing
 	
 	public void stream()
 	{
 		//EmbeddedMediaPlayer mediaPlayer = prepareVideo(this.player.getMediaPlayer());
 		System.out.println(this.options);
-		this.mediaPlayer = this.componentPlayer.mediaPlayer();
+		this.listPlayer.controls().play();
+		/*this.mediaPlayer = this.listPlayer.mediaPlayer().mediaPlayer();
 		this.mediaPlayer.media().play(this.video.videoPath, this.options);
 		this.audioTrack = this.mediaPlayer.audio().track();
 		if(this.video.subtitlePath != null)
-			mediaPlayer.subpictures().setSubTitleFile(this.video.subtitlePath);
+			mediaPlayer.subpictures().setSubTitleFile(this.video.subtitlePath);*/
 		
 	}//end of stream
+	
+	public void processCommand(String cmd)
+	{
+		while(true)
+		{
+			
+				switch(cmd.toUpperCase())
+				{
+				case "PAUSE":
+					pause();
+					this.paused = true;
+					break;
+				case "PLAY":
+					play();
+					this.paused = false;
+					break;
+				case "CYCLEAUDIO":
+					cycleAudio();
+				/*case "SYNCTRACKFORWARD":
+					this.audioDelay += 50;
+					this.mediaPlayer.audio().setDelay(audioDelay);
+					System.out.println("Audio Delay = " + this.audioDelay);
+					break;
+				case "SYNCTRACKBACKWARD":
+					this.audioDelay -= 50;
+					this.mediaPlayer.audio().setDelay(audioDelay);
+					System.out.println("Audio Delay = " + this.audioDelay);
+					break;
+				case "SKIPCHAPTER":
+					this.mediaPlayer.chapters().next();
+					break;
+				case "PREVIOUSCHAPTER":
+					this.mediaPlayer.chapters().previous();*/
+				}//end of switch
+			
+			System.out.println(cmd);
+		}//end of while loop
+	}//end of process controll
 	
 	
 	@Override
 	public void run()
 	{
-		try {
-			while(true)
-			{
-				String cmd = "";
-				
-					switch((cmd = this.in.readLine().toUpperCase()))
-					{
-					case "PAUSE":
-						this.mediaPlayer.controls().pause();
-						this.paused = true;
-						break;
-					case "PLAY":
-						this.mediaPlayer.controls().start();
-						this.paused = false;
-						break;
-					case "CYCLEAUDIO":
-						System.out.println("Track Count = " + this.mediaPlayer.audio().trackCount());
-						this.audioDescriptions = this.mediaPlayer.audio().trackDescriptions();
-						for(TrackDescription temp : this.audioDescriptions)
-						{
-							System.out.println(temp.description() + " ID: " + temp.id());
-						}
-						
-						audioTrack++;
-						if(audioTrack >= this.mediaPlayer.audio().trackCount())
-							audioTrack = 0;
-						this.mediaPlayer.audio().setTrack(this.audioDescriptions.get(audioTrack).id());
-						//this.mediaPlayer.mute();
-						//this.mediaPlayer.mute(false);
-						System.out.println("Audio index = " + audioTrack);
-						System.out.println("Audio Description: " + this.audioDescriptions.get(audioTrack).description());
-						System.out.println("Audio ID: " + this.audioDescriptions.get(audioTrack).id());
-						break;
-					case "SYNCTRACKFORWARD":
-						this.audioDelay += 50;
-						this.mediaPlayer.audio().setDelay(audioDelay);
-						System.out.println("Audio Delay = " + this.audioDelay);
-						break;
-					case "SYNCTRACKBACKWARD":
-						this.audioDelay -= 50;
-						this.mediaPlayer.audio().setDelay(audioDelay);
-						System.out.println("Audio Delay = " + this.audioDelay);
-						break;
-					case "SKIPCHAPTER":
-						this.mediaPlayer.chapters().next();
-						break;
-					case "PREVIOUSCHAPTER":
-						this.mediaPlayer.chapters().previous();
-					}//end of switch
-				
-				System.out.println(cmd);
-			}//end of while loop
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			this.mediaPlayer.controls().stop();
-			e.printStackTrace();
-		}//end of catch
+		stream();
 	}
 }//End of StreamVideo

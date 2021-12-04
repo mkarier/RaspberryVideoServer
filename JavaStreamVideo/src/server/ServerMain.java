@@ -85,7 +85,7 @@ public class ServerMain {
 			Socket client = server.accept();
 			InetAddress address = client.getInetAddress();
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			client.setSoTimeout(TIMEOUT);
+			//client.setSoTimeout(TIMEOUT);
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 
 			
@@ -128,73 +128,43 @@ public class ServerMain {
 	private static boolean playVideos(List<VideoData> videos, BufferedReader in, BufferedWriter out, InetAddress address) throws IOException
 	{
 		
-		for(VideoData video: videos)
-		{
-			streamServer = new StreamServer(address, video, in, out);
-			streamServer.stream();
+		//for(VideoData video: videos)
+		//{
+			streamServer = new StreamServer(address, videos.get(0), in, out);
+			streamServer.addVideos(videos);
+			streamServer.start();
 			out.write(SharedData.videoPort + "\n");
 			out.flush();
-			long duration = 1000l;// streamServer.getDuration();
-			long currentTime = streamServer.getCurrentTime();
-			System.out.println("Duration " + duration);
-			String fromClient = "";
-			try
+			Thread commandListener = new Thread(() -> {checkClientInput(in, streamServer);}); 
+			commandListener.start();
+			while(true)
 			{
-				//fromClient = in.readLine();				
-				//streamServer.start();
-				while(currentTime != -1)
-				{
-					
-					//position = streamServer.getPosition();
-					currentTime = streamServer.getCurrentTime();					
-					streamServer.getDuration();
-					System.out.println(currentTime + "/" + streamServer.getDuration());
-					checkClientInput(in, streamServer);
-					
-					//System.out.println("Position " + streamServer.getPosition());
-				}
-				/*while(true)
-				{
-					System.out.println("Position " + streamServer.getCurrentTime());
-					long duration = streamServer.getDuration();
-					System.out.println("Duration " + duration);
-				}*/
-				streamServer.interrupt();
-			}catch(Exception e) {e.printStackTrace();}
-			streamServer.close();
-			out.write("stop\n");
-			out.flush();
-		}//end of for loop
-		return true;
+				System.out.println("Position: " + streamServer.getPosition());
+				System.out.println("Current time: " + streamServer.getCurrentTime());
+				System.out.println("Duration: " + streamServer.getDuration());
+				System.out.println("Is Running " + streamServer.isPlaying());
+				System.out.println();
+				try { Thread.sleep(10 *1000);}catch(InterruptedException e) {}
+			}
+			//out.write("stop\n");
+			//out.flush();
+		//}//end of for loop
+		//return true;
 	}//end of playVideos
 	
 	
 	public static void checkClientInput(BufferedReader in, StreamServer server)
-	{
-		String cmd = "";
-		
-		try {
-			switch((cmd = in.readLine().toUpperCase()))
-			{
-			case "PAUSE":
-				server.pause();
-				break;
-			case "PLAY":
-				server.play();
-				break;
-			case "CYCLEAUDIO":
-				server.cycleAudio();
-				break;
-			case "SKIPCHAPTER":
-				server.skipChapter();
-				break;
-			}
-			System.out.println(cmd);
-		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-		}//end of switch	
-	}
+	{		
+		while(true)
+		{
+			try {
+				server.processCommand(in.readLine().toUpperCase());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catc
+		}//end of while
+	}//end of checkClientInput
 	
 
 	public static List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)
