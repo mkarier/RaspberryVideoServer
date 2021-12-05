@@ -16,17 +16,18 @@ import javax.swing.JFrame;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import uk.co.caprica.vlcj.player.embedded.fullscreen.adaptive.AdaptiveFullScreenStrategy;
 
 
 public class StreamClient extends Thread
 {
 	public JFrame box = new JFrame("Client Player");
-	public GraphicsDevice device;
+	//public GraphicsDevice device;
 	public EmbeddedMediaPlayerComponent componentPlayer = new EmbeddedMediaPlayerComponent();
 	public MediaPlayer mediaPlayer;
 	public BufferedWriter out;
 	public long audioDelay = 50;
-	private boolean inFullScreen = false;
+	//private boolean inFullScreen = false;
 	//public EmbeddedMediaPlayerComponent player;
 	String toPlay = "";
 	boolean pause = false;
@@ -35,7 +36,7 @@ public class StreamClient extends Thread
 
 	public StreamClient(BufferedWriter out)
 	{
-		this.device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		//this.device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();	
 		this.out = out;
 	}//end of constructor
 	
@@ -69,18 +70,21 @@ public class StreamClient extends Thread
 				break;
 			case KeyEvent.VK_ENTER:
 				System.out.println("Enter Key was pressed and should change to a windowed mode");
-				if(inFullScreen)
+				componentPlayer.mediaPlayer().fullScreen().toggle();
+				/*if(inFullScreen)
 				{
+					componentPlayer.mediaPlayer().fullScreen();
 					System.out.println("Enter key was pressed and changing to windowed mode");
-					device.setFullScreenWindow(null);
+					//device.setFullScreenWindow(null);
 					inFullScreen = false;
 				}
 				else
 				{
+					componentPlayer.mediaPlayer().
 					System.out.println("Changing to Full Screen");
-					device.setFullScreenWindow(box);
+					//device.setFullScreenWindow(box);
 					inFullScreen = true;
-				}
+				}*/
 				break;
 			case 'j':
 			case 'J':
@@ -148,7 +152,13 @@ public class StreamClient extends Thread
 				});
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.toPlay = toPlay;
-		this.componentPlayer = new EmbeddedMediaPlayerComponent();
+		this.componentPlayer = new EmbeddedMediaPlayerComponent(
+				null,
+				null,
+				new AdaptiveFullScreenStrategy(this.box),
+				null,
+				null);
+		this.mediaPlayer = this.componentPlayer.mediaPlayer();	
 		this.componentPlayer.addKeyListener(adapter);
 		this.box.setContentPane(this.componentPlayer);
 		this.box.addKeyListener(adapter);
@@ -173,15 +183,15 @@ public class StreamClient extends Thread
 			this.out.write("start\n");
 			this.out.flush();
 			this.box.setVisible(true);
-			this.mediaPlayer = this.componentPlayer.mediaPlayer();
+			
 			
 			this.mediaPlayer.media().play(toPlay);
 			//this.mediaPlayer.setAudioDelay(audioDelay);
-			if(this.inFullScreen)
+			/*if(this.inFullScreen)
 			{
 				this.device.setFullScreenWindow(this.box);
 				this.inFullScreen = true;
-			}
+			}*/
 			while(this.box.isVisible());
 		
 		} catch (IOException e) {
