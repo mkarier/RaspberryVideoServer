@@ -135,9 +135,11 @@ public class ServerMain {
 			streamServer.start();
 			out.write(SharedData.videoPort + "\n");
 			out.flush();
-			Thread commandListener = new Thread(() -> {checkClientInput(in, streamServer);}); 
-			commandListener.start();
-			while(true)
+			while(streamServer.isPlaying())
+			streamServer.processCommand("TITLE");
+			//Thread commandListener = new Thread(() -> {checkClientInput(in, streamServer);}); 
+			//commandListener.start();
+			while(streamServer.isAlive())
 			{
 				System.out.println("Position: " + streamServer.getPosition());
 				System.out.println("Current time: " + streamServer.getCurrentTime());
@@ -146,6 +148,7 @@ public class ServerMain {
 				System.out.println();
 				try { Thread.sleep(10 *1000);}catch(InterruptedException e) {}
 			}
+			return true;
 			//out.write("stop\n");
 			//out.flush();
 		//}//end of for loop

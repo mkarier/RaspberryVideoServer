@@ -17,7 +17,7 @@ import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 
-public class StreamClient 
+public class StreamClient extends Thread
 {
 	public JFrame box = new JFrame("Client Player");
 	public GraphicsDevice device;
@@ -83,11 +83,13 @@ public class StreamClient
 				break;
 			case 'j':
 			case 'J':
-				sendCommand("SYNCTRACKFORWARD");
+				sendCommand("SKIP");
+				//sendCommand("SYNCTRACKFORWARD");
 				break;
 			case 'l':
 			case 'L':
-				sendCommand("SYNCTRACKBACKWARD");
+				sendCommand("PREVIOUS");
+				//sendCommand("SYNCTRACKBACKWARD");
 				break;
 			case 'a':
 			case 'A':
@@ -100,6 +102,10 @@ public class StreamClient
 			case 'P':
 				sendCommand("PreviousChapter");
 				break;
+			case 't':
+			case 'T':
+				sendCommand("TITLE");
+				break;			
 			}//end of switch statment
 			//box.requestFocusInWindow();
 		}//end of keyReleased
@@ -159,22 +165,23 @@ public class StreamClient
 	}//end of close
 	
 	
-	public void playSomething() throws IOException
+	public void run()
 	{
-		this.out.write("start\n");
-		this.out.flush();
-		this.box.setVisible(true);
-		this.mediaPlayer = (EmbeddedMediaPlayer) this.componentPlayer.mediaPlayer();
-		this.mediaPlayer.media().play(toPlay);
-		//this.mediaPlayer.setAudioDelay(audioDelay);
-		if(this.inFullScreen)
-		{
-			this.device.setFullScreenWindow(this.box);
-			this.inFullScreen = true;
-		}
 		try {
-			Thread.sleep(1*1000);
-		} catch (InterruptedException e) {
+			this.out.write("start\n");
+			this.out.flush();
+			this.box.setVisible(true);
+			this.mediaPlayer = (EmbeddedMediaPlayer) this.componentPlayer.mediaPlayer();
+			this.mediaPlayer.media().play(toPlay);
+			//this.mediaPlayer.setAudioDelay(audioDelay);
+			if(this.inFullScreen)
+			{
+				this.device.setFullScreenWindow(this.box);
+				this.inFullScreen = true;
+			}
+			while(this.box.isVisible());
+		
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

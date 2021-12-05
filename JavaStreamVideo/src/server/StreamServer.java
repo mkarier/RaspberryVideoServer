@@ -28,10 +28,11 @@ public class StreamServer extends Thread
 	//String transcode = "vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none";
 	String target = "";
 	String options = "";
+	String currentTitle = "";
 	public EmbeddedMediaListPlayerComponent componentPlayer;
 	//private MediaPlayer mediaPlayer;
 	private MediaListPlayer listPlayer;
-	List<TrackDescription> audioDescriptions;
+	//List<TrackDescription> audioDescriptions;
 	JFrame box = new JFrame("Server");
 	VideoData video;
 	boolean paused = false;
@@ -63,7 +64,7 @@ public class StreamServer extends Thread
 	
 	public void addVideos(List<VideoData> videos)
 	{
-		
+		this.currentTitle = videos.get(0).videoPath;
 		for(VideoData data: videos)
 		{
 			this.video = data;
@@ -154,22 +155,25 @@ public class StreamServer extends Thread
 	
 	public void cycleAudio()
 	{
-		/*System.out.println("Track Count = " + this.listPlayer.audiot);
-		this.audioDescriptions = this.mediaPlayer.audio().trackDescriptions();
-		for(TrackDescription temp : this.audioDescriptions)
+		System.out.println("Track Count = " + this.componentPlayer.mediaPlayer().audio().trackCount());
+		List<TrackDescription> audioDescriptions = this.componentPlayer.mediaPlayer().audio().trackDescriptions();
+		for(TrackDescription temp : audioDescriptions)
 		{
 			System.out.println(temp.description() + " ID: " + temp.id());
 		}
 		
 		audioTrack++;
-		if(audioTrack >= this.mediaPlayer.audio().trackCount())
+		if(audioTrack >= this.componentPlayer.mediaPlayer().audio().trackCount())
 			audioTrack = 0;
-		this.mediaPlayer.audio().setTrack(this.audioDescriptions.get(audioTrack).id());
+		long currentTime = getCurrentTime();
+		this.componentPlayer.mediaPlayer().audio().setTrack(audioDescriptions.get(audioTrack).id());
+		
 		//this.mediaPlayer.mute();
 		//this.mediaPlayer.mute(false);
 		System.out.println("Audio index = " + audioTrack);
-		System.out.println("Audio Description: " + this.audioDescriptions.get(audioTrack).description());
-		System.out.println("Audio ID: " + this.audioDescriptions.get(audioTrack).id());//*/
+		System.out.println("Audio Description: " + audioDescriptions.get(audioTrack).description());
+		System.out.println("Audio ID: " + audioDescriptions.get(audioTrack).id());//*/
+		this.componentPlayer.mediaPlayer().controls().setTime(currentTime);
 	}//end of cycleAudio
 	
 	public boolean isPlaying()
@@ -192,40 +196,59 @@ public class StreamServer extends Thread
 	
 	public void processCommand(String cmd)
 	{
-		while(true)
+			
+		switch(cmd.toUpperCase())
 		{
-			
-				switch(cmd.toUpperCase())
-				{
-				case "PAUSE":
-					pause();
-					this.paused = true;
-					break;
-				case "PLAY":
-					play();
-					this.paused = false;
-					break;
-				case "CYCLEAUDIO":
-					cycleAudio();
-				/*case "SYNCTRACKFORWARD":
-					this.audioDelay += 50;
-					this.mediaPlayer.audio().setDelay(audioDelay);
-					System.out.println("Audio Delay = " + this.audioDelay);
-					break;
-				case "SYNCTRACKBACKWARD":
-					this.audioDelay -= 50;
-					this.mediaPlayer.audio().setDelay(audioDelay);
-					System.out.println("Audio Delay = " + this.audioDelay);
-					break;
-				case "SKIPCHAPTER":
-					this.mediaPlayer.chapters().next();
-					break;
-				case "PREVIOUSCHAPTER":
-					this.mediaPlayer.chapters().previous();*/
-				}//end of switch
-			
-			System.out.println(cmd);
-		}//end of while loop
+		case "PAUSE":
+			pause();
+			this.paused = true;
+			break;
+		case "PLAY":
+			play();
+			this.paused = false;
+			break;
+		case "CYCLEAUDIO":
+			cycleAudio();
+			break;
+		case "SYNCTRACKFORWARD":
+			//this.audioDelay += 50;
+			//this.componentPlayer.mediaPlayer().audio().setDelay(audioDelay);
+			//System.out.println("Audio Delay = " + this.audioDelay);
+			break;
+		case "SYNCTRACKBACKWARD":
+			//this.audioDelay -= 50;
+			//this.componentPlayer.mediaPlayer().audio().setDelay(audioDelay);
+			//System.out.println("Audio Delay = " + this.audioDelay);
+			break;
+		case "SKIPCHAPTER":
+			this.componentPlayer.mediaPlayer().chapters().next();
+			break;
+		case "PREVIOUSCHAPTER":
+			this.componentPlayer.mediaPlayer().chapters().previous();
+			break;
+		case "SKIP":
+			this.listPlayer.controls().playNext();
+			break;
+		case "PREVIOUS":
+			this.listPlayer.controls().playPrevious();
+			break;
+		case "TITLE":
+			if(this.componentPlayer.mediaPlayer().status().isPlaying())
+			{
+				int titleIndex = this.componentPlayer.mediaPlayer().titles().title();
+				this.currentTitle = this.componentPlayer.mediaPlayer().titles().titleDescriptions().get(titleIndex).toString();
+				System.out.println(currentTitle);
+				try {
+					this.out.append(currentTitle + "\n");
+					this.out.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}//end of catch
+				
+			}//if it is played
+		}//end of switch
+		System.out.println(cmd);
 	}//end of process controll
 	
 	
@@ -233,5 +256,15 @@ public class StreamServer extends Thread
 	public void run()
 	{
 		stream();
+		String cmd  = "";
+		try {
+			while((cmd = this.in.readLine()) != null)
+			{
+				processCommand(cmd);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }//End of StreamVideo

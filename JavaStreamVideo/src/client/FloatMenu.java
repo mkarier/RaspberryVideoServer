@@ -12,10 +12,10 @@ public class FloatMenu
 	public FloatMenu(StreamClient client)
 	{
 		this.box = new JFrame("Floating Menu");
-		String cmd = "<html><p>Spacebar to pause the movie</br>"
+		String cmd = "<html><p>Spacebar to pause the movie<br>"
 				+ "Enter should change windowed mode<br>"
-				+ "j for +50 Audio Delay<br>"
-				+ "l for -50 Audio Delay<br>"
+				+ "j to skip next video<br>"
+				+ "l to watch previous video<br>"
 				+ "a for Audio Cycle<br>"
 				+ "n for skip chapter</p></html>";
 		this.commands = new JLabel(cmd);
