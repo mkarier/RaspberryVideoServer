@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
@@ -22,7 +23,7 @@ public class StreamClient extends Thread
 	public JFrame box = new JFrame("Client Player");
 	public GraphicsDevice device;
 	public EmbeddedMediaPlayerComponent componentPlayer = new EmbeddedMediaPlayerComponent();
-	public EmbeddedMediaPlayer mediaPlayer;
+	public MediaPlayer mediaPlayer;
 	public BufferedWriter out;
 	public long audioDelay = 50;
 	private boolean inFullScreen = false;
@@ -96,7 +97,8 @@ public class StreamClient extends Thread
 				sendCommand("CycleAudio");
 			case'n':
 			case'N':
-				sendCommand("SkipChapter");
+				//sendCommand("SkipChapter");
+				sendCommand("SKIPFORWARD");
 				break;
 			case 'p':
 			case 'P':
@@ -171,7 +173,8 @@ public class StreamClient extends Thread
 			this.out.write("start\n");
 			this.out.flush();
 			this.box.setVisible(true);
-			this.mediaPlayer = (EmbeddedMediaPlayer) this.componentPlayer.mediaPlayer();
+			this.mediaPlayer = this.componentPlayer.mediaPlayer();
+			
 			this.mediaPlayer.media().play(toPlay);
 			//this.mediaPlayer.setAudioDelay(audioDelay);
 			if(this.inFullScreen)

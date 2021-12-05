@@ -17,7 +17,7 @@ public class FloatMenu
 				+ "j to skip next video<br>"
 				+ "l to watch previous video<br>"
 				+ "a for Audio Cycle<br>"
-				+ "n for skip chapter</p></html>";
+				+ "n skip forward 30 sec<br></p></html>";
 		this.commands = new JLabel(cmd);
 		this.commands.addKeyListener(client.getAdapter());
 		this.box.addKeyListener(client.getAdapter());

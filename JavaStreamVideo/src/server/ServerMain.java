@@ -130,12 +130,12 @@ public class ServerMain {
 		
 		//for(VideoData video: videos)
 		//{
-			streamServer = new StreamServer(address, videos.get(0), in, out);
-			streamServer.addVideos(videos);
+			streamServer = new StreamServer(address, videos, in, out);
+			//streamServer.addVideos(videos);
 			streamServer.start();
 			out.write(SharedData.videoPort + "\n");
 			out.flush();
-			while(streamServer.isPlaying())
+			while(!streamServer.isPlaying());
 			streamServer.processCommand("TITLE");
 			//Thread commandListener = new Thread(() -> {checkClientInput(in, streamServer);}); 
 			//commandListener.start();

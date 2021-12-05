@@ -27,34 +27,33 @@ public class StreamServer extends Thread
 	//String transcodeForSub = "transcode{vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
 	//String transcode = "vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none";
 	String target = "";
-	String options = "";
-	String currentTitle = "";
 	public EmbeddedMediaListPlayerComponent componentPlayer;
 	//private MediaPlayer mediaPlayer;
 	private MediaListPlayer listPlayer;
 	//List<TrackDescription> audioDescriptions;
 	JFrame box = new JFrame("Server");
-	VideoData video;
+	List<VideoData> videos;
 	boolean paused = false;
 	int audioTrack = 0;
 	int audioDelay = 0;
 	BufferedReader in;
 	BufferedWriter out;
 	
-	StreamServer(InetAddress target, VideoData video, BufferedReader in , BufferedWriter out)
+	StreamServer(InetAddress target, List<VideoData> videos, BufferedReader in , BufferedWriter out)
 	{
 		System.out.println(target.toString().substring(1));
 		this.in = in;
 		this.out = out;
 		this.target = target.toString().substring(1);
-		this.video = video;
-		getOptions();
-		System.out.println("Path to video " + video.videoPath);
+		this.videos = videos;
+		
+		//getOptions(data);
 		try
 		{			
 			this.componentPlayer = new EmbeddedMediaListPlayerComponent();
 			this.listPlayer = this.componentPlayer.mediaListPlayer();
 		}catch(Exception e) {e.printStackTrace();}
+		addVideos(videos);
 		this.box.setBounds(100,100, 800, 400);
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.box.setContentPane(this.componentPlayer);
@@ -63,40 +62,40 @@ public class StreamServer extends Thread
 	}
 	
 	public void addVideos(List<VideoData> videos)
-	{
-		this.currentTitle = videos.get(0).videoPath;
+	{		
 		for(VideoData data: videos)
 		{
-			this.video = data;
-			this.getOptions();
-			this.listPlayer.list().media().add(this.video.videoPath, this.options);
+			String options = this.getOptions(data);
+			this.listPlayer.list().media().add(data.videoPath, options);
 		}//end of for loop 
 	}//end of addVideos
 	
-	public void getOptions()
+	public String getOptions(VideoData video)
 	{
+		String options = "";
 		String start = "sout=#";
 		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
-		if(this.video.hasSubtitles)
-			this.options = start + transcodeForSub + standard;
+		if(video.hasSubtitles)
+			options = start + transcodeForSub + standard;
 		else
-			this.options = start + transcodeForNoSub + standard;
+			options = start + transcodeForNoSub + standard;
+		return options;
 	}//end of get Options
 	
-	public EmbeddedMediaPlayer prepareVideo(EmbeddedMediaPlayer mediaPlayer)
+	/*public EmbeddedMediaPlayer prepareVideo(EmbeddedMediaPlayer mediaPlayer, VideoData video)
 	{
 		String start = "sout=#";
 		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
 		if(video.hasSubtitles)
 		{		
-			mediaPlayer.media().play(this.video.videoPath, start, transcodeForSub, standard);
-			if(this.video.subtitlePath != null)
-				mediaPlayer.subpictures().setSubTitleFile(this.video.subtitlePath);
+			mediaPlayer.media().play(video.videoPath, start, transcodeForSub, standard);
+			if(video.subtitlePath != null)
+				mediaPlayer.subpictures().setSubTitleFile(video.subtitlePath);
 		}
 		else
-			mediaPlayer.media().play(this.video.videoPath, start, transcodeForNoSub, standard);
+			mediaPlayer.media().play(video.videoPath, start, transcodeForNoSub, standard);
 		return mediaPlayer;
-	}//end of get Options
+	}//end of get Options*/
 	
 	
 	public void close()
@@ -183,8 +182,7 @@ public class StreamServer extends Thread
 	
 	public void stream()
 	{
-		//EmbeddedMediaPlayer mediaPlayer = prepareVideo(this.player.getMediaPlayer());
-		System.out.println(this.options);
+		//EmbeddedMediaPlayer mediaPlayer = prepareVideo(this.player.getMediaPlayer());	
 		this.listPlayer.controls().play();
 		/*this.mediaPlayer = this.listPlayer.mediaPlayer().mediaPlayer();
 		this.mediaPlayer.media().play(this.video.videoPath, this.options);
@@ -232,15 +230,26 @@ public class StreamServer extends Thread
 		case "PREVIOUS":
 			this.listPlayer.controls().playPrevious();
 			break;
+		case "SKIPFORWARD":
+			this.componentPlayer.mediaPlayer().controls().setTime(getCurrentTime() + (30 *1000));
+			break;
 		case "TITLE":
 			if(this.componentPlayer.mediaPlayer().status().isPlaying())
 			{
 				int titleIndex = this.componentPlayer.mediaPlayer().titles().title();
-				this.currentTitle = this.componentPlayer.mediaPlayer().titles().titleDescriptions().get(titleIndex).toString();
-				System.out.println(currentTitle);
+				System.out.println("titleIndex: " + titleIndex);				
 				try {
-					this.out.append(currentTitle + "\n");
-					this.out.flush();
+					if(titleIndex < this.videos.size())
+					{
+						String path = this.videos.get(titleIndex).videoPath.substring(titleIndex);
+						String delemit = "\\";
+						if(!path.contains(delemit))
+							delemit = "/";
+						String currentTitle = path.substring(path.lastIndexOf(delemit));
+						System.out.println("Title: " + currentTitle);
+						this.out.append(currentTitle + "\n");
+						this.out.flush();
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -255,7 +264,7 @@ public class StreamServer extends Thread
 	@Override
 	public void run()
 	{
-		stream();
+		this.listPlayer.controls().play();
 		String cmd  = "";
 		try {
 			while((cmd = this.in.readLine()) != null)
