@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CSharpServer": {
+      "commandName": "Project",
+      "commandLineArgs": "\"Z:\\Adventure.Time\\Season4\" \"Z:\\Adventure.Time\\Season5\" --StartTime 31 --EndTime 30 2"
+    }
+  }
+}

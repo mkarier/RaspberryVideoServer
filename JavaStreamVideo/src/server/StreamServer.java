@@ -152,6 +152,26 @@ public class StreamServer extends Thread
 		this.paused = false;
 	}
 	
+	public String getTitle()
+	{
+		if(this.componentPlayer.mediaPlayer().status().isPlaying())
+		{
+			int titleIndex = this.componentPlayer.mediaPlayer().titles().title();
+			//System.out.println("titleIndex: " + titleIndex);				
+			if(titleIndex < this.videos.size())
+			{
+				String path = this.videos.get(titleIndex).videoPath.substring(titleIndex);
+				String delemit = "\\";
+				if(!path.contains(delemit))
+					delemit = "/";
+				String currentTitle = path.substring(path.lastIndexOf(delemit));
+				return currentTitle;
+			}//end to make sure it wont throw array out of bounds
+		}//end of if 
+		return "";
+	}//end of get Title
+	
+	
 	public void cycleAudio()
 	{
 		System.out.println("Track Count = " + this.componentPlayer.mediaPlayer().audio().trackCount());

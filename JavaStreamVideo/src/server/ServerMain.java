@@ -137,16 +137,25 @@ public class ServerMain {
 			out.flush();
 			while(!streamServer.isPlaying());
 			streamServer.processCommand("TITLE");
+			String title = streamServer.getTitle();
+			System.out.println(title);
 			//Thread commandListener = new Thread(() -> {checkClientInput(in, streamServer);}); 
 			//commandListener.start();
 			while(streamServer.isAlive())
 			{
-				System.out.println("Position: " + streamServer.getPosition());
+				/*System.out.println("Position: " + streamServer.getPosition());
 				System.out.println("Current time: " + streamServer.getCurrentTime());
 				System.out.println("Duration: " + streamServer.getDuration());
 				System.out.println("Is Running " + streamServer.isPlaying());
-				System.out.println();
-				try { Thread.sleep(10 *1000);}catch(InterruptedException e) {}
+				System.out.println();*/
+				if(!title.contentEquals(streamServer.getTitle()))
+				{
+					title = streamServer.getTitle();
+					System.out.println(title);
+					streamServer.processCommand("TITLE");
+					
+				}
+				try { Thread.sleep(30 *1000);}catch(InterruptedException e) {}
 			}
 			return true;
 			//out.write("stop\n");

@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 
+import shared_class.SharedData;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
@@ -26,7 +27,7 @@ public class StreamClient extends Thread
 	public EmbeddedMediaPlayerComponent componentPlayer = new EmbeddedMediaPlayerComponent();
 	public MediaPlayer mediaPlayer;
 	public BufferedWriter out;
-	public long audioDelay = 50;
+	//public long audioDelay = 50;
 	//private boolean inFullScreen = false;
 	//public EmbeddedMediaPlayerComponent player;
 	String toPlay = "";
@@ -135,21 +136,6 @@ public class StreamClient extends Thread
 		this.box = new JFrame("Playing from: " + toPlay);
 		this.box.setBounds(100,100, 800, 400);
 		this.box.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		this.box.addFocusListener(new FocusListener()
-				{
-
-					@Override
-					public void focusGained(FocusEvent e) {
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void focusLost(FocusEvent e) {
-						// TODO Auto-generated method stub
-						//box.requestFocus();
-					}
-				});
 		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.toPlay = toPlay;
 		this.componentPlayer = new EmbeddedMediaPlayerComponent(
@@ -199,5 +185,10 @@ public class StreamClient extends Thread
 			e.printStackTrace();
 		}
 	}//end of play something 
+
+	public void setTitle(String fromServer) {
+		this.box.setTitle(SharedData.access + "://@" + fromServer);
+		
+	}
 	
 }//end of class
