@@ -30,6 +30,7 @@ public class StreamClient extends Thread
 	//public long audioDelay = 50;
 	//private boolean inFullScreen = false;
 	//public EmbeddedMediaPlayerComponent player;
+	String networkOptions = ":network-caching=1000";
 	String toPlay = "";
 	boolean pause = false;
 	
@@ -131,8 +132,9 @@ public class StreamClient extends Thread
 		}
 	}
 	
-	public void init(String toPlay)
+	public void init(String toPlay, String networkOptions)
 	{
+		this.networkOptions = networkOptions;
 		this.box = new JFrame("Playing from: " + toPlay);
 		this.box.setBounds(100,100, 800, 400);
 		this.box.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -143,8 +145,8 @@ public class StreamClient extends Thread
 				null,
 				new AdaptiveFullScreenStrategy(this.box),
 				null,
-				null);
-		this.mediaPlayer = this.componentPlayer.mediaPlayer();	
+				null);		
+		this.mediaPlayer = this.componentPlayer.mediaPlayer();			
 		this.componentPlayer.addKeyListener(adapter);
 		this.box.setContentPane(this.componentPlayer);
 		this.box.addKeyListener(adapter);
@@ -171,7 +173,8 @@ public class StreamClient extends Thread
 			this.box.setVisible(true);
 			
 			
-			this.mediaPlayer.media().play(toPlay);
+			this.mediaPlayer.media().play(toPlay, this.networkOptions);
+			System.out.println(networkOptions);
 			//this.mediaPlayer.setAudioDelay(audioDelay);
 			/*if(this.inFullScreen)
 			{

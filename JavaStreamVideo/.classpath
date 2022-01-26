@@ -10,7 +10,7 @@
 	<classpathentry kind="lib" path="vlcj-3.12.1/jna-platform-5.2.0.jar"/>
 	<classpathentry kind="lib" path="vlcj-3.12.1/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="vlcj-3.12.1/slf4j-nop-1.7.30.jar"/>
-	<classpathentry kind="lib" path="vlcj-4.7.1.jar">
+	<classpathentry kind="lib" path="C:/Users/mkarier/Documents/Github/RaspberryVideoServer/JavaStreamVideo/vlcj-4.7.1/vlcj-4.7.1.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/mkarier/Documents/Github/RaspberryVideoServer/JavaStreamVideo/vlcj-4.7.1-javadoc.jar!/"/>
 		</attributes>

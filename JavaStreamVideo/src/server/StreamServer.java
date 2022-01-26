@@ -12,12 +12,15 @@ import shared_class.SharedData;
 import shared_class.VideoData;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
+import uk.co.caprica.vlcj.media.Media;
+import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.TrackDescription;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaListPlayerComponent;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.list.MediaListPlayer;
+import uk.co.caprica.vlcj.player.list.MediaListPlayerEventListener;
 
 public class StreamServer extends Thread
 {
@@ -51,7 +54,7 @@ public class StreamServer extends Thread
 		try
 		{			
 			this.componentPlayer = new EmbeddedMediaListPlayerComponent();
-			this.listPlayer = this.componentPlayer.mediaListPlayer();
+			this.listPlayer = this.componentPlayer.mediaListPlayer();			
 		}catch(Exception e) {e.printStackTrace();}
 		addVideos(videos);
 		this.box.setBounds(100,100, 800, 400);
@@ -66,7 +69,7 @@ public class StreamServer extends Thread
 		for(VideoData data: videos)
 		{
 			String options = this.getOptions(data);
-			this.listPlayer.list().media().add(data.videoPath, options);
+			this.listPlayer.list().media().add(data.videoPath, options);			
 		}//end of for loop 
 	}//end of addVideos
 	
@@ -79,6 +82,7 @@ public class StreamServer extends Thread
 			options = start + transcodeForSub + standard;
 		else
 			options = start + transcodeForNoSub + standard;
+		
 		return options;
 	}//end of get Options
 	

@@ -18,14 +18,22 @@ public class ClientMain
 	public static void main(String[] args) 
 	{
 		StreamClient player = null;
+		String networkOptions = ":network-caching=";
 		try{
 			if(System.getProperty("os.name").contains("Windows"))
 				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
 			else
 				System.out.println("OS = linux");
 			Socket socket = null;
-			if(args.length >= 1)
-				socket = new Socket(args[0], SharedData.comPort);
+			if(args.length >= 1) {
+					socket = new Socket(args[0], SharedData.comPort);
+					if(args.length >= 2)
+					{
+						networkOptions += args[1];
+					}
+					else
+						networkOptions += 1000;
+			}
 			else
 				socket = new Socket(host, SharedData.comPort);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -35,7 +43,7 @@ public class ClientMain
 			String toPlay = SharedData.access + "://@:" + videoPort;
 			String fromServer = "continue";
 			player = new StreamClient(out);
-			player.init(toPlay);
+			player.init(toPlay, networkOptions);
 			System.out.println("initialized the player");
 			player.start();
 			System.out.println("Starting to play");

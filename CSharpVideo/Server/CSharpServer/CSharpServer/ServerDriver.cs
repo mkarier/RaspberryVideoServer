@@ -55,22 +55,18 @@ namespace CSharpServer
 			{
 				TcpListener server = new TcpListener(IPAddress.Any, comPort);
 				server.Start();
-				TcpClient client = new TcpClient();
-				client = server.AcceptTcpClient();
-				if (client.Client != null)
+				TcpClient? client = server.AcceptTcpClient();
+				IPEndPoint? remoteEndPoint = (client.Client.RemoteEndPoint as IPEndPoint);
+				if (remoteEndPoint != null)
 				{
-					var remoteEndPoint = (client.Client.RemoteEndPoint as IPEndPoint);
-					if (remoteEndPoint != null)
-					{
-						string clientIP = remoteEndPoint.Address.ToString();
-						StreamReader reader = new StreamReader(client.GetStream());
-						StreamWriter writer = new StreamWriter(client.GetStream());
-						Console.WriteLine(clientIP);
-						writer.WriteLine(ServerDriver.videoPort);
-						writer.Flush();
-						playVideos(videos, reader, writer, clientIP);
-					}
-				}
+					string clientIP = remoteEndPoint.Address.ToString();
+					StreamReader reader = new StreamReader(client.GetStream());
+					StreamWriter writer = new StreamWriter(client.GetStream());
+					Console.WriteLine(clientIP);
+					writer.WriteLine(ServerDriver.videoPort);
+					writer.Flush();
+					playVideos(videos, reader, writer, clientIP);
+				}//end if remoteEndPoint is not null
 			}
 			catch (VLCException ex) { Console.WriteLine(ex.StackTrace); }
 		}//end of main

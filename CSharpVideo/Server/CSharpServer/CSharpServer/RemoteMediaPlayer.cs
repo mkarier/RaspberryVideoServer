@@ -19,9 +19,10 @@ namespace CSharpServer
         private int cursor = ServerDriver.start;
         private long duration = 0;
 
-        string transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
-        string transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
-
+        string transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mp3,ab=128,channels=2,samplerate=44100,soverlay}:";
+        //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
+        //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,width=800,height=400,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
+        string transcodeForNoSub = "";
         public RemoteMediaPlayer(List<VideoData> videoList, StreamReader reader, StreamWriter writer, string clientIP)
         {
             this.reader = reader;
@@ -33,19 +34,23 @@ namespace CSharpServer
             this.mp = new MediaPlayer(this._libVLC);            
             this.cursor = ServerDriver.start;
             this.media = getMedia(this.mediaList[cursor]);
-            this.mp.Media = media;
+            this.mp.Media = media;           
             this.duration = this.media.Duration;
             this.mp.Time = ServerDriver.startTime;
             this.mp.LengthChanged += (sender, args) => ThreadPool.QueueUserWorkItem(_ => this.duration = args.Length);
             this.mp.TimeChanged += (sender, args) => ThreadPool.QueueUserWorkItem(_=> calculateTime(args.Time));
-            this.mp.EndReached += (sender, args) => ThreadPool.QueueUserWorkItem(_ => nextMedia());
+            this.mp.EndReached += (sender, args) => ThreadPool.QueueUserWorkItem(_ => nextMedia());           
+            ThreadPool.QueueUserWorkItem(_ => listenToClient());
         }
 
         public void sendTitle()
         {
-            if (this.mp.Media != null)
+            if (cursor >= 0 && cursor < this.mediaList.Count)
             {
-                this.writer.WriteLine(this.mp.Media.Mrl);
+                int lastIndex = this.mediaList[cursor].videoPath.LastIndexOf("/");
+                if(lastIndex == -1)
+                    lastIndex = this.mediaList[cursor].videoPath.LastIndexOf("\\");
+                this.writer.WriteLine(this.mediaList[cursor].videoPath.Substring(lastIndex));
                 this.writer.Flush();
             }
         }
@@ -70,7 +75,7 @@ namespace CSharpServer
         public bool play() {
             Console.WriteLine("Starting to play");
             bool startedPlaying = this.mp.Play();
-            //this.duration = this.media.Duration;
+            sendTitle();
             this.mp.Time = ServerDriver.startTime;
             return startedPlaying;
         }
@@ -80,7 +85,14 @@ namespace CSharpServer
             this.media = getMedia(this.mediaList[increaseCursor()]);
             this.mp.Media = this.media;
             play();
-        }
+        }//end of nextMedia
+
+        private void previousMedia()
+        {
+            this.media = getMedia(this.mediaList[decrementCursor()]);
+            this.mp.Media = this.media;
+            play();
+        }//end of previousMedia
 
 
         public int increaseCursor()
@@ -91,21 +103,89 @@ namespace CSharpServer
             else return cursor;
         }
 
+        public int decrementCursor()
+        {
+            this.cursor--;
+            if (cursor < 0)
+                return 0;
+            else return cursor;
+        }
+
         public long getDuration() { return this.duration; }
         public long getCurrentTime() { return this.mp.Time; }
 
         public Media getMedia(VideoData video)
         {
             string options = "";
-            string start = "sout=#";
+            string start = ":sout=#";
             string standard = $"{ServerDriver.access}{{mux=ts,dst={this.clientIP},port={ServerDriver.videoPort}}}";
             if (video.hasSubtitles)
                 options = start + transcodeForSub + standard;
             else
                 options = start + transcodeForNoSub + standard;
-            //Console.WriteLine(options);
+            Console.WriteLine(options);
             return new Media(this._libVLC, video.videoPath, FromType.FromPath, options);
         }//end of getMedia
+
+
+        private void cycleAudio()
+        {
+            //TODO: cycle audio
+        }
+
+       
+
+        public void listenToClient()
+        {        
+            try
+            {
+                string? input;
+                while ((input = this.reader.ReadLine()) != null)
+                {
+                    switch(input.ToUpper())
+                    {
+                        case "PAUSE":
+                            this.mp.Pause();                            
+                            break;
+                        case "PLAY":
+                            this.mp.Play();                          
+                            break;
+                        case "CYCLEAUDIO":
+                            cycleAudio();
+                            break;
+                        case "SYNCTRACKFORWARD":
+                            //this.audioDelay += 50;
+                            //this.componentPlayer.mediaPlayer().audio().setDelay(audioDelay);
+                            //System.out.println("Audio Delay = " + this.audioDelay);
+                            break;
+                        case "SYNCTRACKBACKWARD":
+                            //this.audioDelay -= 50;
+                            //this.componentPlayer.mediaPlayer().audio().setDelay(audioDelay);
+                            //System.out.println("Audio Delay = " + this.audioDelay);
+                            break;
+                        case "SKIPCHAPTER":
+                            this.mp.NextChapter();
+                            break;
+                        case "PREVIOUSCHAPTER":
+                            this.mp.PreviousChapter();
+                            break;
+                        case "SKIP":
+                            nextMedia();
+                            break;
+                        case "PREVIOUS":
+                            previousMedia();
+                            break;
+                        case "SKIPFORWARD":
+                            this.mp.Pause();
+                            this.mp.Time = (this.mp.Time + (30 * 1000));
+                            this.mp.Play();
+                            break;
+                    }//end of switch
+                    Console.WriteLine(input);
+                }//end of while loop
+            }//end of try
+            catch (IOException e) { Console.Error.WriteLine(e.StackTrace); }
+        }//end of listenToClient
 
     }
 }
