@@ -101,6 +101,7 @@ public class StreamClient extends Thread
 			case 'a':
 			case 'A':
 				sendCommand("CycleAudio");
+				break;
 			case'n':
 			case'N':
 				//sendCommand("SkipChapter");

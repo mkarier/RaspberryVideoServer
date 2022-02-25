@@ -2,7 +2,7 @@
   "profiles": {
     "CSharpServer": {
       "commandName": "Project",
-      "commandLineArgs": "\"Z:\\Regular Show\\Season 4\" \"Z:\\Regular Show\\Season 5\" \"Z:\\Regular Show\\Season 6\" 5"
+      "commandLineArgs": "\"Z:\\Fairy Tail\\Season2\" --startchapter 4 --stopchapter 5"
     }
   }
 }

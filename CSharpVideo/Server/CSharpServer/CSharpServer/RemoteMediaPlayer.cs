@@ -18,6 +18,7 @@ namespace CSharpServer
         private StreamWriter writer;
         private int cursor = ServerDriver.start;
         private long duration = 0;
+        private int currentChapter = 0;
 
         string transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mp3,ab=128,channels=2,samplerate=44100,soverlay}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
@@ -39,9 +40,10 @@ namespace CSharpServer
             this.mp.Time = ServerDriver.startTime;
             this.mp.LengthChanged += (sender, args) => ThreadPool.QueueUserWorkItem(_ => this.duration = args.Length);
             this.mp.TimeChanged += (sender, args) => ThreadPool.QueueUserWorkItem(_=> calculateTime(args.Time));
-            this.mp.EndReached += (sender, args) => ThreadPool.QueueUserWorkItem(_ => nextMedia());           
+            this.mp.EndReached += (sender, args) => ThreadPool.QueueUserWorkItem(_ => nextMedia());
+            this.mp.ChapterChanged += (sender, args) => ThreadPool.QueueUserWorkItem(_ => endingChapter(args.Chapter));
             ThreadPool.QueueUserWorkItem(_ => listenToClient());
-        }
+        }//end of constructor
 
         public void sendTitle()
         {
@@ -50,10 +52,12 @@ namespace CSharpServer
                 int lastIndex = this.mediaList[cursor].videoPath.LastIndexOf("/");
                 if(lastIndex == -1)
                     lastIndex = this.mediaList[cursor].videoPath.LastIndexOf("\\");
-                this.writer.WriteLine(this.mediaList[cursor].videoPath.Substring(lastIndex));
-                this.writer.Flush();
-            }
-        }
+                string title = this.mediaList[cursor].videoPath.Substring(lastIndex) + "\n";
+                this.writer.WriteLine(title);
+                this.writer.FlushAsync();               
+                Console.WriteLine(title);
+            }//end of if coursor is greater then zero and less then the mediaList.count
+        }//end of sendTitle
 
         public void calculateTime(long timeArg)
         {
@@ -78,19 +82,56 @@ namespace CSharpServer
             sendTitle();
             this.mp.Time = ServerDriver.startTime;
             return startedPlaying;
-        }
+        }//end of play
 
         public void nextMedia()
         {
-            this.media = getMedia(this.mediaList[increaseCursor()]);
-            this.mp.Media = this.media;
-            play();
+            try
+            {
+                this.media = getMedia(this.mediaList[increaseCursor()]);
+                Media? current = this.mp.Media;
+                this.mp.Media = this.media;                
+                if (current != null)
+                    current.Dispose();
+                play();
+            }catch(IndexOutOfRangeException e)
+            {
+                quit();
+            }
         }//end of nextMedia
+
+        private void quit()
+        {
+            this.mp.Dispose();
+        }
+
+        private void endingChapter(int chapter)
+        {
+            if (currentChapter == chapter)
+                return;
+            else
+                currentChapter = chapter;
+            Console.WriteLine("Chapter " + chapter);
+            if (ServerDriver.startChapter > chapter)
+            {
+                this.mp.NextChapter();
+            }//end of chapter is less then available chapter
+            if (ServerDriver.stopChapter > 0)
+            {                               
+                if (chapter >= ServerDriver.stopChapter)
+                {
+                    nextMedia();
+                }//end of if you reach the chapter the episode shouldEnd;
+            }//end of ending chapter
+        }//end of endingChapter
 
         private void previousMedia()
         {
             this.media = getMedia(this.mediaList[decrementCursor()]);
+            Media? current = this.mp.Media;
             this.mp.Media = this.media;
+            if(current != null)
+                current.Dispose();
             play();
         }//end of previousMedia
 
@@ -131,6 +172,14 @@ namespace CSharpServer
         private void cycleAudio()
         {
             //TODO: cycle audio
+            this.mp.Pause();
+            int currentAudio = this.mp.AudioTrack;
+            Console.WriteLine("From Audio track " + currentAudio + this.mp.AudioTrackDescription[currentAudio].Name);
+            if(!this.mp.SetAudioTrack((currentAudio + 1)))
+               this.mp.SetAudioTrack((currentAudio + 1) % this.mp.AudioTrack);
+
+            this.mp.Play();
+            Console.WriteLine("To Audio Track " + this.mp.AudioTrack + this.mp.AudioTrackDescription[this.mp.AudioTrack].Name);        
         }
 
        

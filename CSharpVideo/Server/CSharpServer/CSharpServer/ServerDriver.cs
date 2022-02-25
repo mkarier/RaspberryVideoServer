@@ -15,6 +15,8 @@ namespace CSharpServer
 		internal static int start = 0;
 		internal static long startTime = 0;
 		internal static long endBeforeTime = 0;
+		internal static int startChapter = 0;
+		internal static int stopChapter = 0;
 
 
 		private static string[] TypesOfVideos = {".264", ".3g2", ".3gp", ".3gp2", ".3gpp", ".3gpp2", ".3mm", ".3p2", ".60d", ".787", ".89", ".aaf", ".aec", ".aep", ".aepx",
@@ -89,13 +91,19 @@ namespace CSharpServer
 			for(int i = 0; i < args.Length; i++)
 			{
 				string input = args[i];
-				switch (input)
+				switch (input.ToLower())
 				{
-					case "--StartTime":
+					case "--starttime":
 						startTime = Int32.Parse(args[++i]) * 1000;
 						break;
-					case "--EndTime":
+					case "--endtime":
 						endBeforeTime = Int32.Parse(args[++i]) * 100;
+						break;
+					case "--startchapter":
+						startChapter = Int32.Parse(args[++i]);
+						break;
+					case "--stopchapter":
+						stopChapter = Int32.Parse(args[++i]);
 						break;
 					case "-s":
 					case "-S":

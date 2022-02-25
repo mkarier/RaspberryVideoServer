@@ -57,7 +57,7 @@ public class ClientMain
 				
 				
 				fromServer = in.readLine();//TODO: make this better. Right now it is waiting for the server to write 'stop' before moving on
-				//player.close();
+				System.out.println(fromServer);
 				player.setTitle(fromServer);
 				System.out.println("Player was closed");
 				}finally {TimeUnit.SECONDS.sleep(3 *1000);}
