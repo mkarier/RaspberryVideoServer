@@ -10,8 +10,8 @@ public class VideoData
 	String transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
 	///String transcodeForSub = "transcode{vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
 	
-	String transcodeForNoSub = "transcode{vcodec=h264,vb=2000,venc=x264{profile=baseline},acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
-	//String transcodeForNoSub = "transcode{vcodec=h264,vb=800,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	String transcodeForNoSub = "transcode{vcodec=hevc,venc=x264,vb=2000,scale=Auto,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForNoSub = "transcode{vcodec=hvec,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//String transcodeForNoSub = "";
 	//String transcodeForNoSub = "transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	

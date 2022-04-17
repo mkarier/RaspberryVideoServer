@@ -68,15 +68,16 @@ public class RemoteMediaPlayer
 					playNext();
 				}//*/
 				long remainingTime = player.status().length() - SharedData.endTime;
-				if(time > 1 && time < SharedData.startTime)
+				if(time < SharedData.startTime)
 				{
-					player.submit(new Runnable() {
+					player.controls().setTime(SharedData.startTime+1);
+					/*player.submit(new Runnable() {
 						@Override
 						public void run() {
-							player.controls().setTime(SharedData.startTime);
+							player.controls().setTime(SharedData.startTime+1);
 						}
-					});
-				}//end of skipping to startTime
+					});*/
+				}//end of skipping to startTime*/
 				else if(time >= remainingTime)
 				{
 					player.submit(new Runnable() {
@@ -143,7 +144,7 @@ public class RemoteMediaPlayer
 			@Override
 			public void error(MediaPlayer arg0) {
 				// TODO Auto-generated method stub
-				//System.out.println("There was an error");
+				System.out.println("There was an error");
 				
 			}
 
