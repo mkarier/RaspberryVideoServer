@@ -89,7 +89,8 @@ public class ServerMain {
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 
 			
-			boolean finished = playVideos(listOfVideos, in, out, address);
+			runServer(listOfVideos, in, out, address);
+			//boolean finished = playVideos(listOfVideos, in, out, address);
 			
 			cleanUp(out, in, server, client);
 		}catch(Exception e )
@@ -106,6 +107,20 @@ public class ServerMain {
 		}
 	}//end of main
 	
+	private static void runServer(List<VideoData> listOfVideos, BufferedReader in, BufferedWriter out,
+			InetAddress address) throws IOException {
+		// TODO Auto-generated method stub
+		RemoteMediaPlayer mediaPlayer = new RemoteMediaPlayer(listOfVideos, out, address);
+		mediaPlayer.playNext();
+		out.write(SharedData.videoPort + "\n");
+		out.flush();
+		String input = "";
+		while((input = in.readLine()) !=null)
+		{
+			mediaPlayer.processUserCommand(input);
+		}//end of while loop
+	}//end of run server
+
 	/**
 	 * This method is at the end of the program to clean up stuff. 
 	 * @param out This is the writer to the client
@@ -184,19 +199,39 @@ public class ServerMain {
 		ArrayList<VideoData> listOfVideos = new ArrayList<VideoData>();
 		VideoData cursor = new VideoData();
 		boolean useEmbeded = false;
+		boolean setStartTime = false;
+		boolean setStopTime = false;
 		for(String arg: args)
 		{
-			switch(arg)
+			switch(arg.toLowerCase())
 			{
-				case "-s":
-				case "-S":
+				case "--starttime":
+					setStartTime = true;
+					break;
+				case "--endtime":
+					setStopTime = true;
+					break;
+				case "-s":				
 					cursor.hasSubtitles= true;
 					break;
 				case "-es":
 					useEmbeded = true;
 					break;
 				default:
-					try {options.start = Integer.parseInt(arg);}
+					try {
+							if(setStartTime)
+							{
+								SharedData.startTime = Long.parseLong(arg) * 1000;
+								setStartTime = false;
+							}
+							else if(setStopTime)
+							{
+								SharedData.endTime = Long.parseLong(arg) * 1000;
+								setStopTime = false;
+							}
+							else
+								options.start = Integer.parseInt(arg);
+						}
 					catch(NumberFormatException e)
 					{
 						if(checkIfDir(arg))

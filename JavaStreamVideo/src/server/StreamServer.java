@@ -13,8 +13,14 @@ import shared_class.VideoData;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
 import uk.co.caprica.vlcj.media.Media;
+import uk.co.caprica.vlcj.media.MediaEventListener;
+import uk.co.caprica.vlcj.media.MediaParsedStatus;
 import uk.co.caprica.vlcj.media.MediaRef;
+import uk.co.caprica.vlcj.media.Meta;
+import uk.co.caprica.vlcj.media.Picture;
+import uk.co.caprica.vlcj.media.TrackType;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
 import uk.co.caprica.vlcj.player.base.TrackDescription;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaListPlayerComponent;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
@@ -31,7 +37,7 @@ public class StreamServer extends Thread
 	//String transcode = "vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none";
 	String target = "";
 	public EmbeddedMediaListPlayerComponent componentPlayer;
-	//private MediaPlayer mediaPlayer;
+	private MediaPlayer mediaPlayer;
 	private MediaListPlayer listPlayer;
 	//List<TrackDescription> audioDescriptions;
 	JFrame box = new JFrame("Server");
@@ -53,8 +59,87 @@ public class StreamServer extends Thread
 		//getOptions(data);
 		try
 		{			
-			this.componentPlayer = new EmbeddedMediaListPlayerComponent();
-			this.listPlayer = this.componentPlayer.mediaListPlayer();			
+			this.componentPlayer = new EmbeddedMediaListPlayerComponent();		
+			this.componentPlayer.mediaPlayer().events().addMediaEventListener(new MediaEventListener() {
+
+				@Override
+				public void mediaDurationChanged(Media arg0, long arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaFreed(Media arg0, MediaRef arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaMetaChanged(Media arg0, Meta arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaParsedChanged(Media arg0, MediaParsedStatus arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaStateChanged(Media arg0, uk.co.caprica.vlcj.player.base.State arg1) {
+					// TODO Auto-generated method stub
+					switch(arg1)
+					{
+						case BUFFERING:
+								System.out.println("Buffering");
+							break;
+						case ENDED:
+								System.out.println("Ended");
+							break;
+						case ERROR:
+								System.out.println("Error");
+							break;
+						case NOTHING_SPECIAL:
+								System.out.println("Nothing_Special");
+							break;
+						case OPENING:
+								System.out.println("Opening");
+							break;
+						case PAUSED:
+								System.out.println("Paused");								
+							break;
+						case PLAYING:
+								System.out.println("Palying");
+							break;
+						case STOPPED:
+								System.out.println("Stopped");
+							break;
+						default:
+							break;						
+					}///end of switch					
+				}//end of mediaStatChanged
+
+				@Override
+				public void mediaSubItemAdded(Media arg0, MediaRef arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaSubItemTreeAdded(Media arg0, MediaRef arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaThumbnailGenerated(Media arg0, Picture arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+			});
+			this.mediaPlayer = this.componentPlayer.mediaPlayer();
 		}catch(Exception e) {e.printStackTrace();}
 		addVideos(videos);
 		this.box.setBounds(100,100, 800, 400);
@@ -68,23 +153,236 @@ public class StreamServer extends Thread
 	{		
 		for(VideoData data: videos)
 		{
-			String options = this.getOptions(data);
+			String options = data.getOptions(target);
+			this.mediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventListener() {
+
+				@Override
+				public void audioDeviceChanged(MediaPlayer arg0, String arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void backward(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void buffering(MediaPlayer arg0, float arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void chapterChanged(MediaPlayer arg0, int arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void corked(MediaPlayer arg0, boolean arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void elementaryStreamAdded(MediaPlayer arg0, TrackType arg1, int arg2) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void elementaryStreamDeleted(MediaPlayer arg0, TrackType arg1, int arg2) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void elementaryStreamSelected(MediaPlayer arg0, TrackType arg1, int arg2) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void error(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void finished(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void forward(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void lengthChanged(MediaPlayer arg0, long arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaChanged(MediaPlayer arg0, MediaRef arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaPlayerReady(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void muted(MediaPlayer arg0, boolean arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void opening(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void pausableChanged(MediaPlayer arg0, int arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void paused(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void playing(MediaPlayer arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void positionChanged(MediaPlayer arg0, float arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void scrambledChanged(MediaPlayer arg0, int arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void seekableChanged(MediaPlayer arg0, int arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void snapshotTaken(MediaPlayer arg0, String arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void stopped(MediaPlayer arg0) {
+					// TODO Auto-generated method stu
+					
+				}
+
+				@Override
+				public void timeChanged(MediaPlayer arg0, long arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void titleChanged(MediaPlayer arg0, int arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void videoOutput(MediaPlayer arg0, int arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void volumeChanged(MediaPlayer arg0, float arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+			});
+			this.mediaPlayer.events().addMediaEventListener(new MediaEventListener() {
+
+				@Override
+				public void mediaDurationChanged(Media arg0, long arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaFreed(Media arg0, MediaRef arg1) {
+					// TODO Auto-generated method stub
+					
+					
+				}
+
+				@Override
+				public void mediaMetaChanged(Media arg0, Meta arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaParsedChanged(Media arg0, MediaParsedStatus arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaStateChanged(Media arg0, uk.co.caprica.vlcj.player.base.State arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaSubItemAdded(Media arg0, MediaRef arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaSubItemTreeAdded(Media arg0, MediaRef arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mediaThumbnailGenerated(Media arg0, Picture arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+			});
+			//this.mediaPlayer.media().play(null, null);
 			this.listPlayer.list().media().add(data.videoPath, options);			
 		}//end of for loop 
 	}//end of addVideos
 	
-	public String getOptions(VideoData video)
-	{
-		String options = "";
-		String start = "sout=#";
-		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
-		if(video.hasSubtitles)
-			options = start + transcodeForSub + standard;
-		else
-			options = start + transcodeForNoSub + standard;
-		
-		return options;
-	}//end of get Options
+	
 	
 	/*public EmbeddedMediaPlayer prepareVideo(EmbeddedMediaPlayer mediaPlayer, VideoData video)
 	{

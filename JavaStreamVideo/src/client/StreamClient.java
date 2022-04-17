@@ -174,7 +174,7 @@ public class StreamClient extends Thread
 			this.box.setVisible(true);
 			
 			
-			this.mediaPlayer.media().play(toPlay, this.networkOptions);
+			this.mediaPlayer.submit(()-> {this.mediaPlayer.media().play(toPlay, this.networkOptions);});			
 			System.out.println(networkOptions);
 			//this.mediaPlayer.setAudioDelay(audioDelay);
 			/*if(this.inFullScreen)
@@ -182,7 +182,7 @@ public class StreamClient extends Thread
 				this.device.setFullScreenWindow(this.box);
 				this.inFullScreen = true;
 			}*/
-			while(this.box.isVisible());
+			//while(this.box.isVisible());
 		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

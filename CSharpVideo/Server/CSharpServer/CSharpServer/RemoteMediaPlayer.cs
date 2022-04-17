@@ -22,6 +22,7 @@ namespace CSharpServer
 
         string transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mp3,ab=128,channels=2,samplerate=44100,soverlay}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
+        //string transcodeForNoSub = "transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,width=800,height=400,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
         string transcodeForNoSub = "";
         public RemoteMediaPlayer(List<VideoData> videoList, StreamReader reader, StreamWriter writer, string clientIP)

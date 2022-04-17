@@ -35,7 +35,10 @@ public class ClientMain
 						networkOptions += 1000;
 			}
 			else
+			{
 				socket = new Socket(host, SharedData.comPort);
+				networkOptions += 1000;
+			}
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			String videoPort = in.readLine();
@@ -50,22 +53,15 @@ public class ClientMain
 			FloatMenu menu = new FloatMenu(player);
 			while(!fromServer.contains("quit"))
 			{
-				try
-				{
-				
-				TimeUnit.SECONDS.sleep(2);
-				
-				
 				fromServer = in.readLine();//TODO: make this better. Right now it is waiting for the server to write 'stop' before moving on
 				System.out.println(fromServer);
 				player.setTitle(fromServer);
 				System.out.println("Player was closed");
-				}finally {TimeUnit.SECONDS.sleep(3 *1000);}
 			}//end of while
 			player.close();
 			socket.close();
 			menu.close();
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

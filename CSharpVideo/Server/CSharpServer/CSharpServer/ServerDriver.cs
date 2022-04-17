@@ -97,7 +97,7 @@ namespace CSharpServer
 						startTime = Int32.Parse(args[++i]) * 1000;
 						break;
 					case "--endtime":
-						endBeforeTime = Int32.Parse(args[++i]) * 100;
+						endBeforeTime = Int32.Parse(args[++i]) * 1000;
 						break;
 					case "--startchapter":
 						startChapter = Int32.Parse(args[++i]);
