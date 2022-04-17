@@ -39,6 +39,7 @@ public class RemoteMediaPlayer
 	private MediaPlayerEventListener listener;
 	private MediaPlayerFactory factory = new MediaPlayerFactory();
 	private BufferedWriter out;
+	private boolean skippingTime = false;
 	
 	public RemoteMediaPlayer(List<VideoData> videoList, BufferedWriter out, InetAddress clientIP)
 	{
@@ -68,16 +69,18 @@ public class RemoteMediaPlayer
 					playNext();
 				}//*/
 				long remainingTime = player.status().length() - SharedData.endTime;
-				if(time < SharedData.startTime)
+				if(time < SharedData.startTime && !skippingTime)
 				{
-					player.controls().setTime(SharedData.startTime+1);
-					/*player.submit(new Runnable() {
+					player.submit(new Runnable() {
 						@Override
 						public void run() {
-							player.controls().setTime(SharedData.startTime+1);
+							player.controls().setTime(SharedData.startTime);
 						}
-					});*/
+					});
+					skippingTime = true;
 				}//end of skipping to startTime*/
+				else if(time > SharedData.startTime && skippingTime)
+					skippingTime = false;
 				else if(time >= remainingTime)
 				{
 					player.submit(new Runnable() {
@@ -294,6 +297,7 @@ public class RemoteMediaPlayer
 					String options = videoData.getOptions(target);
 					System.out.println("Setup: " + videoData.videoPath);
 					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options);
+					skippingTime = false;
 					//System.out.println("Media was prepared");
 					//this.mediaPlayer.controls().play();			
 					if(!videoPlayed)
