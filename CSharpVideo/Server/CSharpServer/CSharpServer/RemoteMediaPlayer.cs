@@ -24,7 +24,9 @@ namespace CSharpServer
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,width=800,height=400,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
-        string transcodeForNoSub = "";
+        string transcodeForNoSub = "transcode{vcodec=mp2v,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+        //string transcodeForNoSub = "transcode{vcodec=h264,vb=256,vfilter=vhs,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+        //string transcodeForNoSub = "";
         public RemoteMediaPlayer(List<VideoData> videoList, StreamReader reader, StreamWriter writer, string clientIP)
         {
             this.reader = reader;
@@ -95,6 +97,7 @@ namespace CSharpServer
                 if (current != null)
                     current.Dispose();
                 play();
+                writer.WriteLine(this.media.Mrl);
             }catch(IndexOutOfRangeException e)
             {
                 quit();
@@ -103,6 +106,7 @@ namespace CSharpServer
 
         private void quit()
         {
+            this.writer.WriteLine("quit");
             this.mp.Dispose();
         }
 

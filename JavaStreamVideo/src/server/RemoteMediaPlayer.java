@@ -296,7 +296,7 @@ public class RemoteMediaPlayer
 					VideoData videoData = videIterator.get(cursor++);
 					String options = videoData.getOptions(target);
 					System.out.println("Setup: " + videoData.videoPath);
-					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options);
+					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":no-sout-all");
 					skippingTime = false;
 					//System.out.println("Media was prepared");
 					//this.mediaPlayer.controls().play();			
@@ -323,6 +323,14 @@ public class RemoteMediaPlayer
 		}//end of if there is a next video
 		else
 		{
+			try {
+				this.out.write("quit\n");
+				this.out.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			System.out.println("There is no next video");
 		}//end of else
 	}//end of playNexit
