@@ -56,6 +56,7 @@ public class StreamClient extends Thread
 			
 			switch(e.getKeyChar())
 			{
+			
 			case KeyEvent.VK_SPACE:
 				System.out.println("Going to pause or continue from pause");
 				if(!pause)
@@ -114,7 +115,16 @@ public class StreamClient extends Thread
 			case 't':
 			case 'T':
 				sendCommand("TITLE");
-				break;			
+				break;	
+			case KeyEvent.VK_0:
+				componentPlayer.mediaPlayer().video().setBrightness(0.5f);
+				break;
+			case KeyEvent.VK_1:
+				componentPlayer.mediaPlayer().video().setBrightness(1f);
+				break;
+			case KeyEvent.VK_2:
+				componentPlayer.mediaPlayer().video().setBrightness(2f);
+				break;
 			}//end of switch statment
 			//box.requestFocusInWindow();
 		}//end of keyReleased
@@ -174,7 +184,10 @@ public class StreamClient extends Thread
 			this.box.setVisible(true);
 			
 			
-			this.mediaPlayer.submit(()-> {this.mediaPlayer.media().play(toPlay, this.networkOptions);});			
+			this.mediaPlayer.submit(()-> {
+				this.mediaPlayer.media().play(toPlay, this.networkOptions);
+				this.mediaPlayer.video().setAdjustVideo(true);
+			});			
 			System.out.println(networkOptions);
 			//this.mediaPlayer.setAudioDelay(audioDelay);
 			/*if(this.inFullScreen)
