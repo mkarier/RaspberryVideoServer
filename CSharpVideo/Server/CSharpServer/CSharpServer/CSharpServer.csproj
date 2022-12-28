@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,10 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LibVLCSharp" Version="3.6.6" />
-    <PackageReference Include="LibVLCSharp.Avalonia" Version="3.6.6" />
-    <PackageReference Include="LibVLCSharp.Forms" Version="3.6.6" />
-    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.17.4" />
+    <PackageReference Include="LibVLCSharp" Version="3.6.7" />
+    <PackageReference Include="LibVLCSharp.Avalonia" Version="3.6.7" />
+    <PackageReference Include="LibVLCSharp.Forms" Version="3.6.7" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
   </ItemGroup>
 
 </Project>

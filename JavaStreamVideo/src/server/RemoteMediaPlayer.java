@@ -296,7 +296,7 @@ public class RemoteMediaPlayer
 					VideoData videoData = videIterator.get(cursor++);
 					String options = videoData.getOptions(target);
 					System.out.println("Setup: " + videoData.videoPath);
-					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":no-sout-all");
+					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":no-sout-all", ":netsync-master", ":network-synchronisation");
 					skippingTime = false;
 					//System.out.println("Media was prepared");
 					//this.mediaPlayer.controls().play();			

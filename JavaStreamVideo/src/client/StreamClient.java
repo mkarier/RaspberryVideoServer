@@ -185,7 +185,7 @@ public class StreamClient extends Thread
 			
 			
 			this.mediaPlayer.submit(()-> {
-				this.mediaPlayer.media().play(toPlay, this.networkOptions);
+				this.mediaPlayer.media().play(toPlay, this.networkOptions, ":network-synchronisation");
 				this.mediaPlayer.video().setAdjustVideo(true);
 			});			
 			System.out.println(networkOptions);
