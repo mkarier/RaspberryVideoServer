@@ -20,11 +20,11 @@ namespace CSharpServer
         private long duration = 0;
         private int currentChapter = 0;
 
-        string transcodeForSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
+        string transcodeForSub = "transcode{vcodec=mp4v,scale=Auto,acodec=mp4a,ab=128,channels=2,samplerate=44100,soverlay}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,width=800,height=400,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
-        string transcodeForNoSub = "transcode{vcodec=mp2v,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+        string transcodeForNoSub = "transcode{vcodec=mp4v,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=256,vfilter=vhs,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "";
         public RemoteMediaPlayer(List<VideoData> videoList, StreamReader reader, StreamWriter writer, string clientIP)
