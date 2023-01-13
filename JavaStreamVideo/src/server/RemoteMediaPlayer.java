@@ -102,13 +102,9 @@ public class RemoteMediaPlayer
 				System.out.println("Current Chapter: " + currentChapter);				
 				if(SharedData.endChapter != 0)
 				{
-					if(currentChapter >= SharedData.endChapter)
+					if(chapter >= SharedData.endChapter)
 					{
-						player.submit(new Runnable() {
-							public void run() {
-								player.controls().stop();
-							}//end of run
-						});//end of player submit
+						playNext();
 					}//end if current chapter is greater then or equal to the end chatper
 				}//end of else SharedData
 			}//end of chapterChanged() Event
