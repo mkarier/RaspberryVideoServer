@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import com.sun.jna.NativeLibrary;
 
 import shared_class.SharedData;
+import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 
 public class ClientMain 
 {
@@ -24,6 +25,7 @@ public class ClientMain
 				NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
 			else
 				System.out.println("OS = linux");
+			new NativeDiscovery().discover();
 			Socket socket = null;
 			if(args.length >= 1) {
 					socket = new Socket(args[0], SharedData.comPort);

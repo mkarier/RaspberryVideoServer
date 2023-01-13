@@ -99,7 +99,18 @@ public class RemoteMediaPlayer
 			public void chapterChanged(MediaPlayer player, int chapter)
 			{
 				currentChapter = chapter;
-				System.out.println("Current Chapter: " + currentChapter);
+				System.out.println("Current Chapter: " + currentChapter);				
+				if(SharedData.endChapter != 0)
+				{
+					if(currentChapter >= SharedData.endChapter)
+					{
+						player.submit(new Runnable() {
+							public void run() {
+								player.controls().stop();
+							}//end of run
+						});//end of player submit
+					}//end if current chapter is greater then or equal to the end chatper
+				}//end of else SharedData
 			}//end of chapterChanged() Event
 
 			@Override
@@ -179,7 +190,14 @@ public class RemoteMediaPlayer
 			public void mediaChanged(MediaPlayer player, MediaRef arg1) {
 				// TODO Auto-generated method stub
 				System.out.println("Media Changed");
-				
+				if(SharedData.startChapter != 0)
+				{
+					player.submit(new Runnable() {
+						public void run() {
+							player.chapters().setChapter(SharedData.startChapter);
+						}
+					});
+				}
 			}//end of media changed
 
 			@Override

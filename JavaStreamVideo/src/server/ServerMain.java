@@ -22,7 +22,8 @@ import com.sun.jna.NativeLibrary;
 
 import shared_class.SharedData;
 import shared_class.VideoData;
-import uk.co.caprica.vlcj.binding.RuntimeUtil;
+import uk.co.caprica.vlcj.binding.support.runtime.*;
+//import uk.co.caprica.vlcj.binding.RuntimeUtil;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
@@ -201,8 +202,10 @@ public class ServerMain {
 		boolean useEmbeded = false;
 		boolean setStartTime = false;
 		boolean setStopTime = false;
-		for(String arg: args)
+		for(int i = 0; i < args.length; i++)
 		{
+			String arg = args[i];
+			System.out.println("args: " + arg);
 			switch(arg.toLowerCase())
 			{
 				case "--starttime":
@@ -210,6 +213,12 @@ public class ServerMain {
 					break;
 				case "--endtime":
 					setStopTime = true;
+					break;
+				case "--startchapter":
+					SharedData.startChapter = Integer.parseInt(args[++i]);
+					break;
+				case "--endchapter":
+					SharedData.endChapter = Integer.parseInt(args[++i]);
 					break;
 				case "-s":				
 					cursor.hasSubtitles= true;
