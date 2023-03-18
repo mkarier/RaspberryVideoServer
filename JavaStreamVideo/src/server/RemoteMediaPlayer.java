@@ -1,10 +1,8 @@
 package server;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -12,20 +10,11 @@ import javax.swing.JFrame;
 import shared_class.SharedData;
 import shared_class.VideoData;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
-import uk.co.caprica.vlcj.media.Media;
-import uk.co.caprica.vlcj.media.MediaEventListener;
-import uk.co.caprica.vlcj.media.MediaParsedStatus;
 import uk.co.caprica.vlcj.media.MediaRef;
-import uk.co.caprica.vlcj.media.Meta;
-import uk.co.caprica.vlcj.media.Picture;
 import uk.co.caprica.vlcj.media.TrackType;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
-import uk.co.caprica.vlcj.player.base.State;
 import uk.co.caprica.vlcj.player.base.TitleDescription;
-import uk.co.caprica.vlcj.player.component.EmbeddedMediaListPlayerComponent;
-import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
-import uk.co.caprica.vlcj.player.list.MediaListPlayer;
 
 public class RemoteMediaPlayer
 {
@@ -51,6 +40,12 @@ public class RemoteMediaPlayer
 		System.out.println(target);
 		this.mediaPlayer = factory.mediaPlayers().newMediaPlayer();
 		setUpMediaPlayer();
+		/*if(System.getProperty("os.name").toLowerCase().contains("linux"))
+		{
+			;
+			this.box.setVisible(true);
+			this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		}//*/
 		//setUpWindow();
 	}//end of constructor
 	
@@ -310,7 +305,7 @@ public class RemoteMediaPlayer
 					VideoData videoData = videIterator.get(cursor++);
 					String options = videoData.getOptions(target);
 					System.out.println("Setup: " + videoData.videoPath);
-					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":no-sout-all", ":netsync-master", ":network-synchronisation");
+					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":netsync-master", ":network-synchronisation");
 					skippingTime = false;
 					//System.out.println("Media was prepared");
 					//this.mediaPlayer.controls().play();			

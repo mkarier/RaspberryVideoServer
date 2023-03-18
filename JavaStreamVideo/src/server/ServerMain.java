@@ -22,9 +22,11 @@ import com.sun.jna.NativeLibrary;
 
 import shared_class.SharedData;
 import shared_class.VideoData;
+import uk.co.caprica.vlcj.binding.lib.LibX11;
 import uk.co.caprica.vlcj.binding.support.runtime.*;
 //import uk.co.caprica.vlcj.binding.RuntimeUtil;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.factory.NativeLibraryMappingException;
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
 
@@ -61,7 +63,6 @@ public class ServerMain {
 	
 	
 	private static StreamServer streamServer = null;
-	private static int TIMEOUT = 5 * 1000;
 	public static void main(String[] args) 
 	{
 		try
@@ -73,7 +74,10 @@ public class ServerMain {
 				NativeLibrary.addSearchPath(RuntimeUtil.getLibVlcLibraryName(), SharedData.vlcPath);
 			}
 			else
+			{
 				System.out.println("OS = linux");
+				uk.co.caprica.vlcj.binding.support.init.LinuxNativeInit.init();
+			}
 			new NativeDiscovery().discover();
 			ArrayList<String> videoTypes = new ArrayList<String>();
 			videoTypes.addAll(Arrays.asList(TypesOfVideos));
@@ -141,7 +145,7 @@ public class ServerMain {
 	}//end of cleanup
 	
 	
-	private static boolean playVideos(List<VideoData> videos, BufferedReader in, BufferedWriter out, InetAddress address) throws IOException
+	/*private static boolean playVideos(List<VideoData> videos, BufferedReader in, BufferedWriter out, InetAddress address) throws IOException
 	{
 		
 		//for(VideoData video: videos)
@@ -159,11 +163,6 @@ public class ServerMain {
 			//commandListener.start();
 			while(streamServer.isAlive())
 			{
-				/*System.out.println("Position: " + streamServer.getPosition());
-				System.out.println("Current time: " + streamServer.getCurrentTime());
-				System.out.println("Duration: " + streamServer.getDuration());
-				System.out.println("Is Running " + streamServer.isPlaying());
-				System.out.println();*/
 				if(!title.contentEquals(streamServer.getTitle()))
 				{
 					title = streamServer.getTitle();
@@ -178,7 +177,7 @@ public class ServerMain {
 			//out.flush();
 		//}//end of for loop
 		//return true;
-	}//end of playVideos
+	}//end of playVideos*/
 	
 	
 	public static void checkClientInput(BufferedReader in, StreamServer server)
