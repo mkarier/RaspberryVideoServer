@@ -1,14 +1,10 @@
 package server;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -17,20 +13,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sun.jna.Native;
-import com.sun.jna.NativeLibrary;
-
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import shared_class.SharedData;
 import shared_class.VideoData;
-import uk.co.caprica.vlcj.binding.lib.LibX11;
-import uk.co.caprica.vlcj.binding.support.runtime.*;
-//import uk.co.caprica.vlcj.binding.RuntimeUtil;
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
-import uk.co.caprica.vlcj.factory.NativeLibraryMappingException;
-import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
-import uk.co.caprica.vlcj.factory.discovery.strategy.WindowsNativeDiscoveryStrategy;
 
-public class ServerMain {
+public class ServerMain extends Application {
 	
 	private static String[] TypesOfVideos = {".264", ".3g2", ".3gp", ".3gp2", ".3gpp", ".3gpp2", ".3mm", ".3p2", ".60d", ".787", ".89", ".aaf", ".aec", ".aep", ".aepx",
 			".aet", ".aetx", ".ajp", ".ale", ".am", ".amc", ".amv", ".amx", ".anim", ".aqt", ".arcut", ".arf", ".asf", ".asx", ".avb",
@@ -61,59 +50,50 @@ public class ServerMain {
 			".wpl", ".wtv", ".wve", ".wvx", ".xej", ".xel", ".xesc", ".xfl", ".xlmv", ".xmv", ".xvid", ".y4m", ".yog", ".yuv", ".zeg",
 			".zm1", ".zm2", ".zm3", ".zmv"};
 	
-	
-	private static StreamServer streamServer = null;
-	public static void main(String[] args) 
-	{
-		try
-		{
-		    //System.out.println(LibVlc.INSTANCE.libvlc_get_version());
-			if(System.getProperty("os.name").contains("Windows"))
-			{
-				System.out.println(RuntimeUtil.getLibVlcLibraryName());
-				NativeLibrary.addSearchPath(RuntimeUtil.getLibVlcLibraryName(), SharedData.vlcPath);
-			}
-			else
-			{
-				System.out.println("OS = linux");
-				uk.co.caprica.vlcj.binding.support.init.LinuxNativeInit.init();
-			}
-			new NativeDiscovery().discover();
-			ArrayList<String> videoTypes = new ArrayList<String>();
-			videoTypes.addAll(Arrays.asList(TypesOfVideos));
-			SharedData options = new SharedData();
-			List<VideoData> listOfVideos = processArgs(args, videoTypes, options);
-			for(VideoData video: listOfVideos)
-				System.out.println(video.videoPath);
-			
-			ServerSocket server = new ServerSocket(SharedData.comPort);
-			Socket client = server.accept();
-			InetAddress address = client.getInetAddress();
-			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			//client.setSoTimeout(TIMEOUT);
-			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-
-			
-			runServer(listOfVideos, in, out, address);
-			//boolean finished = playVideos(listOfVideos, in, out, address);
-			
-			cleanUp(out, in, server, client);
-		}catch(Exception e )
-		{
-			e.printStackTrace();
-		}//end of catch
-		catch(Throwable t)
-		{
-			t.printStackTrace();
-		}
-		finally
-		{
-			streamServer.close();
-		}
+	private static String[] args = null;
+	ServerSocket server;
+	BufferedReader in;
+	BufferedWriter out;
+	InetAddress address;
+	List<VideoData> listOfVideos;
+	public static void main(String[] args) throws IOException {
+		ServerMain.args = args;
+		launch();
 	}//end of main
 	
-	private static void runServer(List<VideoData> listOfVideos, BufferedReader in, BufferedWriter out,
-			InetAddress address) throws IOException {
+	public ServerMain() throws IOException {
+		ArrayList<String> videoTypes = new ArrayList<String>();
+		videoTypes.addAll(Arrays.asList(TypesOfVideos));
+		SharedData options = new SharedData();
+		listOfVideos = processArgs(ServerMain.args, videoTypes, options);
+		for(VideoData video: listOfVideos)
+			System.out.println(video.videoPath);
+		
+		server = new ServerSocket(SharedData.comPort);
+		Socket client = server.accept();
+		address = client.getInetAddress();
+		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+		out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+
+			//boolean finished = playVideos(listOfVideos, in, out, address);
+			
+	}//end of constructions
+	
+
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		System.out.println("Staring Server Main");
+		Platform.runLater(()->{
+			try {
+				runServer();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});//end of runLater
+	}//end of start
+	
+	private void runServer() throws IOException {
 		// TODO Auto-generated method stub
 		RemoteMediaPlayer mediaPlayer = new RemoteMediaPlayer(listOfVideos, out, address);
 		mediaPlayer.playNext();
@@ -134,7 +114,7 @@ public class ServerMain {
 	 * @param client 
 	 * @throws IOException
 	 */
-	private static void cleanUp(BufferedWriter out, BufferedReader in, ServerSocket server, Socket client) throws IOException
+	private void close(BufferedWriter out, BufferedReader in, ServerSocket server, Socket client) throws IOException
 	{
 		out.write("quit\n");
 		out.flush();
@@ -194,7 +174,7 @@ public class ServerMain {
 	}//end of checkClientInput
 	
 
-	public static List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)
+	public List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)
 	{
 		ArrayList<VideoData> listOfVideos = new ArrayList<VideoData>();
 		VideoData cursor = new VideoData();
