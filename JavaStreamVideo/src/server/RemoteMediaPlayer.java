@@ -13,6 +13,7 @@ import shared_class.VideoData;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.media.TrackType;
+import uk.co.caprica.vlcj.media.callback.CallbackMedia;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
 import uk.co.caprica.vlcj.player.base.TitleDescription;
@@ -21,7 +22,6 @@ public class RemoteMediaPlayer extends Thread
 {
 	
 	String target;
-	JFrame box = new JFrame("Server");
 	List<VideoData> videIterator;
 	private MediaPlayer mediaPlayer;
 	private int cursor = 0;
@@ -31,6 +31,7 @@ public class RemoteMediaPlayer extends Thread
 	private BufferedWriter out;
 	private BufferedReader in;
 	private boolean skippingTime = false;
+	private CallbackMedia currentMedia;
 	
 	public RemoteMediaPlayer(List<VideoData> videoList, BufferedWriter out, BufferedReader in, InetAddress clientIP)
 	{
@@ -300,7 +301,8 @@ public class RemoteMediaPlayer extends Thread
 					VideoData videoData = videIterator.get(cursor++);
 					String options = videoData.getOptions(target);
 					System.out.println("Setup: " + videoData.videoPath);
-					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":netsync-master", ":network-synchronisation");
+					currentMedia = videoData.getAsMedia();
+					boolean videoPlayed = mediaPlayer.media().play(currentMedia, options, ":netsync-master", ":network-synchronisation");
 					skippingTime = false;
 					//System.out.println("Media was prepared");
 					//this.mediaPlayer.controls().play();			
