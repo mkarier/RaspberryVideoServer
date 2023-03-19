@@ -87,7 +87,6 @@ public class StreamClient extends Application
 				e.printStackTrace();
 			}
 		});*/
-		
 		System.out.println("Finished Setting shit up");
 		
 	}//end of start
@@ -120,10 +119,9 @@ public class StreamClient extends Application
 			switch(e.getCode())
 			{
 				case ENTER:
-					this.mediaPlayer.submit(()->{
-						this.mediaPlayer.fullScreen().set(!this.mediaPlayer.fullScreen().isFullScreen());
-					});
-					
+					this.mediaPlayer.fullScreen().set(!this.mediaPlayer.fullScreen().isFullScreen());
+					System.out.println("FullScreen? = " + this.mediaPlayer.fullScreen().isFullScreen());
+					primaryStage.setFullScreen(this.mediaPlayer.fullScreen().isFullScreen());
 					break;
 				case PAUSE:
 				case SPACE:
@@ -133,6 +131,9 @@ public class StreamClient extends Application
 				case TRACK_NEXT:
 				case N:
 					sendCommand("SKIP");
+				case UNDEFINED:
+					System.out.println("UNDEFINED keyCode = " + e.getText());
+					break;
 				default:
 					break;
 			}

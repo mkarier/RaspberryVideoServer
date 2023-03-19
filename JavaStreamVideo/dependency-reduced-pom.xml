@@ -56,8 +56,8 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <mainClass>client.ClientMain</mainClass>
-          <mainClass>server.ServerMain</mainClass>
+          <mainClass>client.StreamClient</mainClass>
+          <mainClass>src.server.Servermain</mainClass>
         </configuration>
       </plugin>
     </plugins>
