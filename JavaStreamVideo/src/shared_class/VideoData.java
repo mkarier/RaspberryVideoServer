@@ -1,5 +1,8 @@
 package shared_class;
 
+import uk.co.caprica.vlcj.media.callback.CallbackMedia;
+import uk.co.caprica.vlcj.media.callback.seekable.RandomAccessFileMedia;
+
 public class VideoData 
 {
 	public boolean hasSubtitles = false;
@@ -16,7 +19,8 @@ public class VideoData
 	//String transcodeForNoSub = "";
 	//String transcodeForNoSub = "transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//String transcodeForNoSub = "transcode{vcodec=h264,vb=300,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
-	String transcodeForNoSub = "transcode{vcodec=mp2v,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForNoSub = "transcode{vcodec=mp2v,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	String transcodeForNoSub = "transcode{vcodec=,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//VHS FIlter
 	//String transcodeForNoSub = "transcode{vcodec=h264,vb=256,vfilter=vhs,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//String transcodeForNoSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
@@ -36,7 +40,9 @@ public class VideoData
 			this.title = videoPath.substring(videoPath.lastIndexOf('/')+1);
 	}//end of VideoData constructor
 	
-	
+	public CallbackMedia getAsMedia() {
+		return new RandomAccessFileMedia(new java.io.File(this.videoPath));
+	}//end of getCallbackMedia
 	public String getOptions(String target)
 	{
 		String options = "";

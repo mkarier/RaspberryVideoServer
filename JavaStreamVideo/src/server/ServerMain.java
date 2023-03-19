@@ -83,28 +83,15 @@ public class ServerMain extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		System.out.println("Staring Server Main");
-		Platform.runLater(()->{
-			try {
-				runServer();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});//end of runLater
+		RemoteMediaPlayer mediaPlayer = new RemoteMediaPlayer(listOfVideos, out, in, address);
+		Platform.runLater(mediaPlayer);
+		
+
 	}//end of start
 	
 	private void runServer() throws IOException {
 		// TODO Auto-generated method stub
-		RemoteMediaPlayer mediaPlayer = new RemoteMediaPlayer(listOfVideos, out, address);
-		mediaPlayer.playNext();
-		out.write(SharedData.videoPort + "\n");
-		out.flush();
-		String input = "";
-		while((input = in.readLine()) !=null)
-		{
-			mediaPlayer.processUserCommand(input);
-		}//end of while loop
-	}//end of run server
+			}//end of run server
 
 	/**
 	 * This method is at the end of the program to clean up stuff. 
@@ -160,7 +147,7 @@ public class ServerMain extends Application {
 	}//end of playVideos*/
 	
 	
-	public static void checkClientInput(BufferedReader in, StreamServer server)
+	/*public static void checkClientInput(BufferedReader in, StreamServer server)
 	{		
 		while(true)
 		{
@@ -171,7 +158,7 @@ public class ServerMain extends Application {
 				e.printStackTrace();
 			}//end of catc
 		}//end of while
-	}//end of checkClientInput
+	}//end of checkClientInput*/
 	
 
 	public List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)

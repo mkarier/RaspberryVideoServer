@@ -57,7 +57,7 @@
 				<artifactId>javafx-maven-plugin</artifactId>
 				<version>0.0.8</version>
 				<configuration>
-					<mainClass>client.ClientMain</mainClass>
+					<mainClass>client.StreamClient</mainClass>
 					<mainClass>src.server.Servermain</mainClass>
 				</configuration>
 			</plugin>
@@ -73,6 +73,11 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
 			<version>17.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.co.caprica</groupId>
+			<artifactId>vlcj-javafx</artifactId>
+			<version>1.2.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/uk.co.caprica/vlcj-natives >
 		<dependency>

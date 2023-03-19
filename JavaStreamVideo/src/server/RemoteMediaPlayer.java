@@ -1,5 +1,6 @@
 package server;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -16,7 +17,7 @@ import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventListener;
 import uk.co.caprica.vlcj.player.base.TitleDescription;
 
-public class RemoteMediaPlayer
+public class RemoteMediaPlayer extends Thread
 {
 	
 	String target;
@@ -28,16 +29,18 @@ public class RemoteMediaPlayer
 	private MediaPlayerEventListener listener;
 	private MediaPlayerFactory factory = new MediaPlayerFactory();
 	private BufferedWriter out;
+	private BufferedReader in;
 	private boolean skippingTime = false;
 	
-	public RemoteMediaPlayer(List<VideoData> videoList, BufferedWriter out, InetAddress clientIP)
+	public RemoteMediaPlayer(List<VideoData> videoList, BufferedWriter out, BufferedReader in, InetAddress clientIP)
 	{
 		
 		this.out = out;
+		this.in = in;
 		this.videIterator = videoList;
 		this.target = clientIP.toString().substring(1);
-		System.out.println(clientIP.getHostName());
-		System.out.println(target);
+		System.out.println("RemoteMediaPlayer:ClientIP.getHostName = " + clientIP.getHostName());
+		System.out.println("RemoteMEdiaPlayer:clientIP.toString().substring(1) = " + target);
 		this.mediaPlayer = factory.mediaPlayers().newMediaPlayer();
 		setUpMediaPlayer();
 		/*if(System.getProperty("os.name").toLowerCase().contains("linux"))
@@ -55,14 +58,6 @@ public class RemoteMediaPlayer
 		this.listener = new MediaPlayerEventListener() {
 			@Override
 			public void timeChanged(MediaPlayer player, long time) {
-				// TODO Auto-generated method stub
-				//TODO: For testing
-				/*if(time > (20 * 1000))
-				{
-					//player.controls().stop();
-					System.out.println("Debug going to next");
-					playNext();
-				}//*/
 				long remainingTime = player.status().length() - SharedData.endTime;
 				if(time < SharedData.startTime && !skippingTime)
 				{
@@ -267,7 +262,7 @@ public class RemoteMediaPlayer
 				// TODO Auto-generated method stub
 				for(TitleDescription des: player.titles().titleDescriptions())
 				{
-					System.out.println(des.name());					
+					System.out.println("TitleChanged:TitleDescription = " + des.name());					
 				}//end of for loop
 				
 			}//end of title changed
@@ -410,5 +405,22 @@ public class RemoteMediaPlayer
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void run() {
+		this.playNext();
+		try {
+			out.write(SharedData.videoPort + "\n");
+			out.flush();
+			String input = "";
+			while((input = in.readLine()) !=null)
+			{
+				this.processUserCommand(input);
+			}//end of while loo
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}//end of run
 	
 }//end of RemoteMediaPlayer

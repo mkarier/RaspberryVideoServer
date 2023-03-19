@@ -1,135 +1,108 @@
 package client;
 
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.List;
 
-import javax.swing.JFrame;
-
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import shared_class.SharedData;
-import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.javafx.fullscreen.JavaFXFullScreenStrategy;
+import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
-import uk.co.caprica.vlcj.player.embedded.fullscreen.adaptive.AdaptiveFullScreenStrategy;
 
-
-public class StreamClient extends Thread
+public class StreamClient extends Application
 {
-	public JFrame box = new JFrame("Client Player");
-	//public GraphicsDevice device;
-	public EmbeddedMediaPlayerComponent componentPlayer = new EmbeddedMediaPlayerComponent();
-	public MediaPlayer mediaPlayer;
 	public BufferedWriter out;
+	public BufferedReader in;
+	private Stage primaryStage;
 	//public long audioDelay = 50;
 	//private boolean inFullScreen = false;
 	//public EmbeddedMediaPlayerComponent player;
+	ImageView view = new ImageView();;
 	String networkOptions = ":network-caching=1000";
 	String toPlay = "";
 	boolean pause = false;
+	private MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory();
+	private EmbeddedMediaPlayer mediaPlayer;
 	
-	public StreamClient() {}
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		List<String> args = getParameters().getRaw();
+		for(String input: args)
+			System.out.println("args: " + input);
+		primaryStage.setTitle("ImageView");
+		this.networkOptions = ":network-caching=";
+		String host = (args.size() >=1)? args.get(0):"localhost";
+		networkOptions += (args.size()>=2)? args.get(1):"1000";
+		try(Socket socket = new Socket(host, SharedData.comPort);){
+			this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			String videoPort = in.readLine();
+			System.out.println("video Port = " + videoPort);
+			this.toPlay = SharedData.access + "://@:" + videoPort;
+			this.mediaPlayer = this.mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
+			BorderPane root = new BorderPane();
+	        root.setStyle("-fx-background-color: black;");
+	        view.fitWidthProperty().bind(root.widthProperty());
+	        view.fitHeightProperty().bind(root.heightProperty());
 
-	public StreamClient(BufferedWriter out)
-	{
-		//this.device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();	
-		this.out = out;
-	}//end of constructor
-	
-	public KeyAdapter getAdapter()
-	{
-		return this.adapter;
-	}//end of getAdapter()
-	
-	private KeyAdapter adapter = new KeyAdapter()
-	{
-		@Override
-		public void keyReleased(KeyEvent e) {
-			// TODO Auto-generated method stub
-			
-			
-			switch(e.getKeyChar())
+	        root.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+	            // If you need to know about resizes
+	        });
+
+	        root.heightProperty().addListener((observableValue, oldValue, newValue) -> {
+	            // If you need to know about resizes
+	        });
+	        root.setCenter(view);
+
+	        Scene scene = new Scene(root, 1200, 675);
+	        primaryStage.setTitle("vlcj JavaFX");
+	        primaryStage.setScene(scene);
+	        this.out.write("start\n");
+			this.out.flush();
+			mediaPlayer.videoSurface().set(new ImageViewVideoSurface(this.view));
+			this.mediaPlayer.submit(()-> {
+				this.mediaPlayer.media().play(toPlay, this.networkOptions, ":network-synchronisation");
+				this.mediaPlayer.video().setAdjustVideo(true);
+			});			
+			System.out.println("StreamClient:run = NetworkOptions" + networkOptions);
+			primaryStage.show();
+			String fromServer = "continues";
+			while(!fromServer.contains("quit"))
 			{
-			
-			case KeyEvent.VK_SPACE:
-				System.out.println("Going to pause or continue from pause");
-				if(!pause)
-				{
-					sendCommand("PAUSE");
-					System.out.println("Going to try and Pause");
-				}
-				else
-				{
-					sendCommand("PLAY");
-					System.out.println("Going to try and continue");
-				}
-				pause = !pause;
-				break;
-			case KeyEvent.VK_ENTER:
-				System.out.println("Enter Key was pressed and should change to a windowed mode");
-				componentPlayer.mediaPlayer().fullScreen().toggle();
-				/*if(inFullScreen)
-				{
-					componentPlayer.mediaPlayer().fullScreen();
-					System.out.println("Enter key was pressed and changing to windowed mode");
-					//device.setFullScreenWindow(null);
-					inFullScreen = false;
-				}
-				else
-				{
-					componentPlayer.mediaPlayer().
-					System.out.println("Changing to Full Screen");
-					//device.setFullScreenWindow(box);
-					inFullScreen = true;
-				}*/
-				break;
-			case 'j':
-			case 'J':
-				sendCommand("SKIP");
-				//sendCommand("SYNCTRACKFORWARD");
-				break;
-			case 'l':
-			case 'L':
-				sendCommand("PREVIOUS");
-				//sendCommand("SYNCTRACKBACKWARD");
-				break;
-			case 'a':
-			case 'A':
-				sendCommand("CycleAudio");
-				break;
-			case'n':
-			case'N':
-				//sendCommand("SkipChapter");
-				sendCommand("SKIPFORWARD");
-				break;
-			case 'p':
-			case 'P':
-				sendCommand("PreviousChapter");
-				break;
-			case 't':
-			case 'T':
-				sendCommand("TITLE");
-				break;	
-			case KeyEvent.VK_0:
-				componentPlayer.mediaPlayer().video().setBrightness(0.5f);
-				break;
-			case KeyEvent.VK_1:
-				componentPlayer.mediaPlayer().video().setBrightness(1f);
-				break;
-			case KeyEvent.VK_2:
-				componentPlayer.mediaPlayer().video().setBrightness(2f);
-				break;
-			}//end of switch statment
-			//box.requestFocusInWindow();
-		}//end of keyReleased
-	};//end of keyAdapter
+				fromServer = in.readLine();//TODO: make this better. Right now it is waiting for the server to write 'stop' before moving on
+				System.out.println(fromServer);
+				this.setTitle(fromServer);
+				//System.out.println("Player was closed");
+			}//end of while
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch(Throwable t) {t.printStackTrace();}
+		finally
+		{			
+			System.out.println("Reached Finally");
+		}
+		
+	}//end of start
 
+	
+
+	
 	
 	public void sendCommand(String cmd)
 	{
@@ -140,72 +113,21 @@ public class StreamClient extends Thread
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
-	}
-	
-	public void init(String toPlay, String networkOptions)
-	{
-		this.networkOptions = networkOptions;
-		this.box = new JFrame("Playing from: " + toPlay);
-		this.box.setBounds(100,100, 800, 400);
-		this.box.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		this.box.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.toPlay = toPlay;
-		this.componentPlayer = new EmbeddedMediaPlayerComponent(
-				null,
-				null,
-				new AdaptiveFullScreenStrategy(this.box),
-				null,
-				null);		
-		this.mediaPlayer = this.componentPlayer.mediaPlayer();			
-		this.componentPlayer.addKeyListener(adapter);
-		this.box.setContentPane(this.componentPlayer);
-		this.box.addKeyListener(adapter);
-	}//end of init
+		}//end of catch
+	}//end of send command
+
 	
 	
-	public void close()
-	{
-		//this.mediaPlayer.controls().stop();
-		//this.mediaPlayer.release();
-		//this.componentPlayer.release();
-		this.box.setVisible(false);
-		this.box.dispose();
-		//device.setFullScreenWindow(null);
-		//inFullScreen = false;
-	}//end of close
-	
-	
-	public void run()
-	{
-		try {
-			this.out.write("start\n");
-			this.out.flush();
-			this.box.setVisible(true);
-			
-			
-			this.mediaPlayer.submit(()-> {
-				this.mediaPlayer.media().play(toPlay, this.networkOptions, ":network-synchronisation");
-				this.mediaPlayer.video().setAdjustVideo(true);
-			});			
-			System.out.println(networkOptions);
-			//this.mediaPlayer.setAudioDelay(audioDelay);
-			/*if(this.inFullScreen)
-			{
-				this.device.setFullScreenWindow(this.box);
-				this.inFullScreen = true;
-			}*/
-			//while(this.box.isVisible());
-		
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}//end of play something 
 
 	public void setTitle(String fromServer) {
-		this.box.setTitle(SharedData.access + "://@" + fromServer);
-		
-	}
+		//this.box.setTitle(SharedData.access + "://@" + fromServer);
+		this.primaryStage.setTitle(fromServer);
+	}//end of set title
 	
+	
+	public static void main(String[] args) 
+	{
+		//ClientMain.args = args;
+		launch(args);
+	}//end of main
 }//end of class

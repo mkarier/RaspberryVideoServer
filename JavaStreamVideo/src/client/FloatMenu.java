@@ -19,8 +19,8 @@ public class FloatMenu
 				+ "a for Audio Cycle<br>"
 				+ "n skip forward 30 sec<br></p></html>";
 		this.commands = new JLabel(cmd);
-		this.commands.addKeyListener(client.getAdapter());
-		this.box.addKeyListener(client.getAdapter());
+		//this.commands.addKeyListener(client.getAdapter());
+		//this.box.addKeyListener(client.getAdapter());
 		this.box.add(this.commands);
 		this.box.pack();
 		this.box.setVisible(true);
