@@ -58,6 +58,8 @@ public class ServerMain extends Application {
 	List<VideoData> listOfVideos;
 	public static void main(String[] args) throws IOException {
 		ServerMain.args = args;
+		if(System.getProperty("os.name").toLowerCase().contains("linux"))
+			System.setProperty("jna.library.path", "/snap/vlc/current/usr/lib/");
 		launch();
 	}//end of main
 	
@@ -84,7 +86,9 @@ public class ServerMain extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		System.out.println("Staring Server Main");
 		RemoteMediaPlayer mediaPlayer = new RemoteMediaPlayer(listOfVideos, out, in, address);
-		Platform.runLater(mediaPlayer);
+		mediaPlayer.start();
+		while(true);
+		//Platform.runLater(mediaPlayer);
 		
 
 	}//end of start
@@ -266,7 +270,12 @@ public class ServerMain extends Application {
 			try
 			{
 				if(checkIfVideo(file, videoTypes))
-					videos.add(new VideoData(path + "\\" + file));
+				{
+					if(file.startsWith(File.separator) || path.endsWith(File.separator))
+						videos.add(new VideoData(path + file));
+					else
+						videos.add(new VideoData(path + File.separator + file));
+				}
 		
 			}catch(StringIndexOutOfBoundsException e) {e.printStackTrace();}
 		}

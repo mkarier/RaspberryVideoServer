@@ -27,11 +27,11 @@ public class RemoteMediaPlayer extends Thread
 	private int cursor = 0;
 	private int currentChapter = 0;
 	private MediaPlayerEventListener listener;
-	private MediaPlayerFactory factory = new MediaPlayerFactory();
+	//private MediaPlayerFactory factory = new MediaPlayerFactory();
 	private BufferedWriter out;
 	private BufferedReader in;
 	private boolean skippingTime = false;
-	private CallbackMedia currentMedia;
+	private static CallbackMedia currentMedia = null;
 	
 	public RemoteMediaPlayer(List<VideoData> videoList, BufferedWriter out, BufferedReader in, InetAddress clientIP)
 	{
@@ -42,6 +42,8 @@ public class RemoteMediaPlayer extends Thread
 		this.target = clientIP.toString().substring(1);
 		System.out.println("RemoteMediaPlayer:ClientIP.getHostName = " + clientIP.getHostName());
 		System.out.println("RemoteMEdiaPlayer:clientIP.toString().substring(1) = " + target);
+		System.setProperty("vlcj.runtime.x86only", "true");
+		MediaPlayerFactory factory = new MediaPlayerFactory();
 		this.mediaPlayer = factory.mediaPlayers().newMediaPlayer();
 		setUpMediaPlayer();
 		/*if(System.getProperty("os.name").toLowerCase().contains("linux"))
@@ -82,7 +84,7 @@ public class RemoteMediaPlayer extends Thread
 					});
 				}//end if time is greater then the remaining time.
 				
-				//System.out.println("Remaining time " + remainingTime);
+				System.out.println("Remaining time " + remainingTime);
 				
 			}
 			
@@ -114,7 +116,7 @@ public class RemoteMediaPlayer extends Thread
 
 			@Override
 			public void buffering(MediaPlayer player, float arg1) {
-				//System.out.println("Bufferring: " + arg1);
+				System.out.println("Bufferring: " + arg1);
 				
 			}
 
@@ -202,7 +204,7 @@ public class RemoteMediaPlayer extends Thread
 			@Override
 			public void opening(MediaPlayer arg0) {
 				// TODO Auto-generated method stub
-				//System.out.println("Opening event");
+				System.out.println("Opening event");
 				
 			}
 
@@ -222,7 +224,7 @@ public class RemoteMediaPlayer extends Thread
 			@Override
 			public void playing(MediaPlayer arg0) {
 				// TODO Auto-generated method stub
-				//System.out.println("Playing");
+				System.out.println("Playing");
 				
 			}
 
@@ -301,8 +303,8 @@ public class RemoteMediaPlayer extends Thread
 					VideoData videoData = videIterator.get(cursor++);
 					String options = videoData.getOptions(target);
 					System.out.println("Setup: " + videoData.videoPath);
-					currentMedia = videoData.getAsMedia();
-					boolean videoPlayed = mediaPlayer.media().play(currentMedia, options, ":netsync-master", ":network-synchronisation");
+					//currentMedia = videoData.getAsMedia();
+					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":netsync-master", ":network-synchronisation");
 					skippingTime = false;
 					//System.out.println("Media was prepared");
 					//this.mediaPlayer.controls().play();			
@@ -414,11 +416,19 @@ public class RemoteMediaPlayer extends Thread
 		try {
 			out.write(SharedData.videoPort + "\n");
 			out.flush();
-			String input = "";
-			while((input = in.readLine()) !=null)
-			{
-				this.processUserCommand(input);
-			}//end of while loo
+			var clientListener = new Thread(()->{
+				String input = "";
+				try {
+					while((input = in.readLine()) !=null)
+					{
+						this.processUserCommand(input);
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}//end of while loo	
+			});
+			clientListener.start();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

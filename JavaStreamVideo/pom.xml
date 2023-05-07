@@ -69,7 +69,7 @@
 			<artifactId>vlcj</artifactId>
 			<version>4.8.2</version>
 		</dependency>
-		<dependency>
+		<!--dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
 			<version>17.0.6</version>
@@ -80,20 +80,20 @@
 			<artifactId>javafx-graphics</artifactId>
 			<version>17.0.6</version>
 			<classifier>win</classifier>
-		</dependency>
+		</dependency-->
 	
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
 			<version>17.0.6</version>
-			<classifier>linux-aarch64</classifier>
+			<classifier>linux</classifier>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
 			<version>17.0.6</version>
-			<classifier>linux-aarch64</classifier>
+			<classifier>linux</classifier>
 		</dependency>
 		<dependency>
 			<groupId>uk.co.caprica</groupId>
