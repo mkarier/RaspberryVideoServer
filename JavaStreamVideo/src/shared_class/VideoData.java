@@ -33,7 +33,7 @@ public class VideoData
 	}//end of default constructor
 	public VideoData(String videoPath)
 	{
-		this.videoPath = videoPath;
+		this.videoPath = videoPath.stripLeading().stripTrailing();
 		if(videoPath.contains("\\"))
 			this.title = videoPath.substring(videoPath.lastIndexOf('\\')+1);
 		else
@@ -46,7 +46,7 @@ public class VideoData
 	public String getOptions(String target)
 	{
 		String options = "";
-		String start = "sout=#";
+		String start = ":sout=#";
 		String standard = String.format("%s{mux=ts,dst=%s,port=%d}", SharedData.access, target, SharedData.videoPort);
 		if(this.hasSubtitles)
 			options = start + transcodeForSub + standard;

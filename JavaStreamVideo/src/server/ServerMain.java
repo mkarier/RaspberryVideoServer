@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,13 +14,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import shared_class.SharedData;
 import shared_class.VideoData;
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
+import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.player.base.State;
 
-public class ServerMain extends Application {
+public class ServerMain {
 	
 	private static String[] TypesOfVideos = {".264", ".3g2", ".3gp", ".3gp2", ".3gpp", ".3gpp2", ".3mm", ".3p2", ".60d", ".787", ".89", ".aaf", ".aec", ".aep", ".aepx",
 			".aet", ".aetx", ".ajp", ".ale", ".am", ".amc", ".amv", ".amx", ".anim", ".aqt", ".arcut", ".arf", ".asf", ".asx", ".avb",
@@ -50,48 +52,143 @@ public class ServerMain extends Application {
 			".wpl", ".wtv", ".wve", ".wvx", ".xej", ".xel", ".xesc", ".xfl", ".xlmv", ".xmv", ".xvid", ".y4m", ".yog", ".yuv", ".zeg",
 			".zm1", ".zm2", ".zm3", ".zmv"};
 	
-	private static String[] args = null;
-	ServerSocket server;
-	BufferedReader in;
-	BufferedWriter out;
-	InetAddress address;
-	List<VideoData> listOfVideos;
-	public static void main(String[] args) throws IOException {
-		ServerMain.args = args;
-		if(System.getProperty("os.name").toLowerCase().contains("linux"))
-			System.setProperty("jna.library.path", "/snap/vlc/current/usr/lib/");
-		launch();
-	}//end of main
+	//private static String[] args = null;
+//	//BufferedReader in;
+	//BufferedWriter out;
+	//InetAddress address;
+	//List<VideoData> listOfVideos;
 	
-	public ServerMain() throws IOException {
+	public static void main(String[] args) throws IOException {
+		new NativeDiscovery().discover();
+		var player = new MediaPlayerFactory().mediaPlayers().newMediaPlayer();
+		player.events().addMediaPlayerEventListener(StreamServerHelper.LISTENER);
 		ArrayList<String> videoTypes = new ArrayList<String>();
 		videoTypes.addAll(Arrays.asList(TypesOfVideos));
 		SharedData options = new SharedData();
-		listOfVideos = processArgs(ServerMain.args, videoTypes, options);
+		var listOfVideos = ServerMain.processArgs(args, videoTypes, options);
 		for(VideoData video: listOfVideos)
 			System.out.println(video.videoPath);
 		
-		server = new ServerSocket(SharedData.comPort);
-		Socket client = server.accept();
-		address = client.getInetAddress();
-		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-
-			//boolean finished = playVideos(listOfVideos, in, out, address);
-			
+		
+		try(var server = new ServerSocket(SharedData.comPort);
+			Socket client = server.accept();)
+		{
+			var address = client.getInetAddress().getHostAddress();
+			var in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			var out = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
+			out.write(SharedData.videoPort + "\n");
+			out.flush();
+			Thread userInputListener = new Thread(()->{
+				String command = "";
+				try {
+					while((command = in.readLine()) != null)
+						processUserCommand(command, player);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});//end of userInputListener
+			userInputListener.start();
+			for(var videoData : listOfVideos)
+			{
+				player.events().removeMediaPlayerEventListener(StreamServerHelper.LISTENER);
+				out.println(videoData.title);
+				System.out.println("Setup: " + videoData.videoPath);				
+				player.submit(()->{
+					player.media().play(videoData.videoPath, videoData.getOptions(address), "--no-xlib");
+				});
+				Thread.sleep(1000 * 5);
+				player.events().addMediaPlayerEventListener(StreamServerHelper.LISTENER);
+				while(player.status().state() != State.STOPPED)
+				{
+					System.out.println("Player State = " + player.status().state());
+					Thread.sleep(1000 * 5);
+				}
+			}//end of for loop
+			out.write("quit\n");
+			out.flush();
+		}catch(IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+	}//end of main
+	
+	public ServerMain() throws IOException {
+		
 	}//end of constructions
 	
+	
+	private static void processUserCommand(String input, MediaPlayer mediaPlayer) {
+		System.out.println("User input: " + input);
+		switch(input.toUpperCase())
+		{
+		case "PAUSE":
+			mediaPlayer.submit(new Runnable() {
+				@Override
+				public void run()
+				{
+					mediaPlayer.controls().pause();
+				}//end of run function
+			});//end of submit
+			break;
+		case "PLAY":
+			mediaPlayer.submit(new Runnable() {
+				@Override
+				public void run()
+				{
+					mediaPlayer.controls().play();
+				}//end of run function
+			});//end of submit
+			break;
+		case "SKIPCHAPTER":
+			mediaPlayer.submit(new Runnable() {
+				@Override
+				public void run()
+				{
+					mediaPlayer.chapters().next();
+				}//end of run function
+			});//end of submit
+			break;
+		case "PREVIOUSCHAPTER":
+			mediaPlayer.submit(new Runnable() {
+				@Override
+				public void run()
+				{
+					mediaPlayer.chapters().previous();
+				}//end of run function
+			});//end of submit
+			break;
+		case "SKIP":
+			mediaPlayer.submit(()->{
+				mediaPlayer.controls().stop();
+			});
+			break;
+		case "PREVIOUS":
+			//playPrevious();
+			break;
+		case "SKIPFORWARD":
+			mediaPlayer.submit(new Runnable() {
+				@Override
+				public void run()
+				{
+					mediaPlayer.controls().skipTime(30l * 1000l);
+				}//end of run function
+			});//end of submit
+			break;
+		}//end of switch
+	}
+	
 
-	@Override
+	/*@Override
 	public void start(Stage primaryStage) throws Exception {
 		System.out.println("Staring Server Main");
-		RemoteMediaPlayer mediaPlayer = new RemoteMediaPlayer(listOfVideos, out, in, address);
-		mediaPlayer.start();
-		while(true);
+		//RemoteMediaPlayer mediaPlayer = new RemoteMediaPlayer(listOfVideos, out, in, address);
+		//TranscodeStreamExample.main(null);
+		//mediaPlayer.start();
+		//while(true);
 		//Platform.runLater(mediaPlayer);
 		
 
-	}//end of start
+	}//end of start*/
 	
 	private void runServer() throws IOException {
 		// TODO Auto-generated method stub
@@ -165,7 +262,7 @@ public class ServerMain extends Application {
 	}//end of checkClientInput*/
 	
 
-	public List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)
+	public static List<VideoData> processArgs(String[] args, ArrayList<String> videoTypes, SharedData options)
 	{
 		ArrayList<VideoData> listOfVideos = new ArrayList<VideoData>();
 		VideoData cursor = new VideoData();

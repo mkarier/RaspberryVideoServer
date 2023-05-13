@@ -170,7 +170,7 @@ namespace CSharpServer
             else
                 options = start + transcodeForNoSub + standard;
             Console.WriteLine(options);
-            return new Media(this._libVLC, video.videoPath, FromType.FromPath, options);
+            return new Media(this._libVLC, video.videoPath, FromType.FromPath, options, "--no-xlib");
         }//end of getMedia
 
 

@@ -1,4 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
+/***
+ * To run on Linux you need to install libvlc-dev && libx11-dev
+ *
+ * 
+ ***/
+
 
 using CSharpServer;
 using LibVLCSharp.Shared;

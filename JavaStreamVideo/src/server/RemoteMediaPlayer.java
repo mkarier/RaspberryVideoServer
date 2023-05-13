@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import shared_class.SharedData;
 import shared_class.VideoData;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.media.TrackType;
 import uk.co.caprica.vlcj.media.callback.CallbackMedia;
@@ -35,14 +36,14 @@ public class RemoteMediaPlayer extends Thread
 	
 	public RemoteMediaPlayer(List<VideoData> videoList, BufferedWriter out, BufferedReader in, InetAddress clientIP)
 	{
-		
+		new NativeDiscovery().discover();
 		this.out = out;
 		this.in = in;
 		this.videIterator = videoList;
 		this.target = clientIP.toString().substring(1);
 		System.out.println("RemoteMediaPlayer:ClientIP.getHostName = " + clientIP.getHostName());
 		System.out.println("RemoteMEdiaPlayer:clientIP.toString().substring(1) = " + target);
-		System.setProperty("vlcj.runtime.x86only", "true");
+		//System.setProperty("vlcj.runtime.x86only", "true");
 		MediaPlayerFactory factory = new MediaPlayerFactory();
 		this.mediaPlayer = factory.mediaPlayers().newMediaPlayer();
 		setUpMediaPlayer();
@@ -290,21 +291,20 @@ public class RemoteMediaPlayer extends Thread
 	{
 		if(this.cursor < this.videIterator.size())
 		{
-			this.mediaPlayer.submit(new Runnable(){
+			/*this.mediaPlayer.submit(new Runnable(){
 				@Override
 				public void run() {
 					mediaPlayer.media().parsing().parse();
 				}
-			});
-			this.mediaPlayer.submit(new Runnable() {
-				@Override
-				public void run() {
-					System.out.println("grabbing next Video....");
-					VideoData videoData = videIterator.get(cursor++);
-					String options = videoData.getOptions(target);
-					System.out.println("Setup: " + videoData.videoPath);
-					//currentMedia = videoData.getAsMedia();
-					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, ":netsync-master", ":network-synchronisation");
+			});*/
+			
+				System.out.println("grabbing next Video....");
+				VideoData videoData = videIterator.get(cursor++);
+				String options = videoData.getOptions(target);
+				System.out.println("Setup: " + videoData.videoPath);
+				//currentMedia = videoData.getAsMedia();
+				this.mediaPlayer.submit(()->{
+					boolean videoPlayed = mediaPlayer.media().play(videoData.videoPath, options, "--no-xlib");
 					skippingTime = false;
 					//System.out.println("Media was prepared");
 					//this.mediaPlayer.controls().play();			
@@ -318,16 +318,16 @@ public class RemoteMediaPlayer extends Thread
 						//setUpMediaPlayer();
 						System.out.println("playing: " + videoData.title);
 						try {
+							
 							out.write(videoData.title + "\n");
-							out.flush();
+							//out.flush();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}//end of catch
 						
 					}//end of else
-				}//end of run
-			});//end of sumbit
+				});//end of sumbit
 		}//end of if there is a next video
 		else
 		{
@@ -413,6 +413,7 @@ public class RemoteMediaPlayer extends Thread
 	@Override
 	public void run() {
 		this.playNext();
+		
 		try {
 			out.write(SharedData.videoPort + "\n");
 			out.flush();
@@ -429,7 +430,36 @@ public class RemoteMediaPlayer extends Thread
 				}//end of while loo	
 			});
 			clientListener.start();
-		} catch (IOException e) {
+			while(true)
+				while(true) {
+		        	System.out.println(this.mediaPlayer.status().state());
+		        	switch(this.mediaPlayer.status().state())
+		        	{
+					case BUFFERING:
+						break;
+					case ENDED:
+						break;
+					case ERROR:
+						break;
+					case NOTHING_SPECIAL:
+						break;
+					case OPENING:
+						this.mediaPlayer.controls().start();
+						break;
+					case PAUSED:
+						break;
+					case PLAYING:
+						System.out.println("Time: " + this.mediaPlayer.status().time());
+						break;
+					case STOPPED:
+						break;
+					default:
+						break;
+		        	
+		        	}//end of switch
+		        	Thread.sleep(1000 * 5);
+		        }//end of while
+		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

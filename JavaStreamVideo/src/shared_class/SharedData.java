@@ -11,6 +11,7 @@ public class SharedData
 	public static long endTime = 0;
 	public static int startChapter = 0;
 	public static int endChapter = 0;
+	public static boolean skippingTime = false;
 	public int start;
 	public boolean hasSubs;
 	
