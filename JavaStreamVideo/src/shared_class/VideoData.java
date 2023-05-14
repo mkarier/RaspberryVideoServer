@@ -1,9 +1,11 @@
 package shared_class;
 
+import java.util.Comparator;
+
 import uk.co.caprica.vlcj.media.callback.CallbackMedia;
 import uk.co.caprica.vlcj.media.callback.seekable.RandomAccessFileMedia;
 
-public class VideoData 
+public class VideoData implements Comparator<VideoData> 
 {
 	public boolean hasSubtitles = false;
 	public String subtitlePath;
@@ -55,4 +57,9 @@ public class VideoData
 		System.out.println(options);
 		return options;
 	}//end of get Options
+	@Override
+	public int compare(VideoData o1, VideoData o2) {
+		// TODO Auto-generated method stub
+		return o1.title.toLowerCase().compareTo(o2.title.toLowerCase());
+	}
 }//end of class VideoData

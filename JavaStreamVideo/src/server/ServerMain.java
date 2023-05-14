@@ -12,6 +12,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import shared_class.SharedData;
@@ -376,7 +377,7 @@ public class ServerMain {
 		
 			}catch(StringIndexOutOfBoundsException e) {e.printStackTrace();}
 		}
-		
+		videos.sort(videos.get(0));
 		return videos;
 	}//end of getVideosFromDir
 	
