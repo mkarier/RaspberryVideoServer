@@ -42,7 +42,7 @@ public class StreamServerHelper {
 			public void chapterChanged(MediaPlayer player, int chapter)
 			{
 				//urrentChapter = chapter;
-				//System.out.println("Current Chapter: " + currentChapter);				
+				System.out.println("Current Chapter: " + chapter);				
 				if(SharedData.endChapter != 0)
 				{
 					if(chapter >= SharedData.endChapter)
@@ -68,7 +68,7 @@ public class StreamServerHelper {
 
 			@Override
 			public void buffering(MediaPlayer player, float arg1) {
-				System.out.println("Bufferring: " + arg1);
+				//System.out.println("Bufferring: " + arg1);
 				
 			}
 

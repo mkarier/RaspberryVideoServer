@@ -24,7 +24,7 @@ namespace CSharpServer
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=3500,width=800,height=400,acodec=mp3,ab=192,channels=2,samplerate=44100,scodec=none}:";
-        string transcodeForNoSub = "transcode{vcodec=mp2v,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=nones}:";
+        string transcodeForNoSub = "transcode{acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "transcode{vcodec=h264,vb=256,vfilter=vhs,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
         //string transcodeForNoSub = "";
         public RemoteMediaPlayer(List<VideoData> videoList, StreamReader reader, StreamWriter writer, string clientIP)
@@ -98,8 +98,8 @@ namespace CSharpServer
                     current.Dispose();
                 play();
                 writer.WriteLine(this.media.Mrl);
-            }catch(IndexOutOfRangeException e)
-            {
+            }catch(IndexOutOfRangeException )
+            {                
                 quit();
             }
         }//end of nextMedia
@@ -170,7 +170,7 @@ namespace CSharpServer
             else
                 options = start + transcodeForNoSub + standard;
             Console.WriteLine(options);
-            return new Media(this._libVLC, video.videoPath, FromType.FromPath, options, "--no-xlib");
+            return new Media(this._libVLC, video.videoPath, FromType.FromPath, options, "--no-xlib", "--file-caching=3000");
         }//end of getMedia
 
 

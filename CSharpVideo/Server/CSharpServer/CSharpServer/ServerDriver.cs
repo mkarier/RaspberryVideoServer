@@ -10,6 +10,7 @@ using CSharpServer;
 using LibVLCSharp.Shared;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 
 namespace CSharpServer
 {
@@ -108,6 +109,7 @@ namespace CSharpServer
 					case "--startchapter":
 						startChapter = Int32.Parse(args[++i]);
 						break;
+					case "--endchapter":
 					case "--stopchapter":
 						stopChapter = Int32.Parse(args[++i]);
 						break;

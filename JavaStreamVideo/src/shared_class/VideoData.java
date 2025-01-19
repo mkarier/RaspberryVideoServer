@@ -13,16 +13,19 @@ public class VideoData implements Comparator<VideoData>
 	public String title;
 	
 	
-	String transcodeForSub = "transcode{vcodec=mp4v,scale=Auto,acodec=mp4a,ab=128,channels=2,samplerate=44100,soverlay}:";
+	String transcodeForSub = "transcode{vcodec=mp2v,scale=Auto,acodec=mp4a,ab=128,channels=2,samplerate=44100,soverlay}:";
 	///String transcodeForSub = "transcode{vcodec=hevc,acodec=mpga,ab=128,channels=2,samplerate=44100,soverlay}:";
 	
 	//String transcodeForNoSub = "transcode{vcodec=h264,vb=600,acodec=mp3,ab=128,channels=2,samplerate=44100,scodec=none}:";
-	//String transcodeForNoSub = "transcode{vcodec=hvec,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForNoSub = "transcode{vcodec=hevc,vb=800,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//String transcodeForNoSub = "";
+	String transcodeForNoSub = "transcode{acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//String transcodeForNoSub = "transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
-	//String transcodeForNoSub = "transcode{vcodec=h264,vb=300,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
+    //String transcodeForNoSub = "transcode{vcodec=mp2v,scale=Auto,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForNoSub = "transcode{vcodec=hevc,scale=Auto,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForNoSub = "transcode{vcodec=h264,vb=1500,width=1280,height=720,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
+	//String transcodeForNoSub = "transcode{vcodec=mp2v,vb=2000,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//String transcodeForNoSub = "transcode{vcodec=mp2v,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
-	String transcodeForNoSub = "transcode{vcodec=mp2v,acodec=mp4a,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//VHS FIlter
 	//String transcodeForNoSub = "transcode{vcodec=h264,vb=256,vfilter=vhs,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";
 	//String transcodeForNoSub = "transcode{vcodec=h264,scale=Auto,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:";

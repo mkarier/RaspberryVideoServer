@@ -60,6 +60,7 @@ public class ServerMain {
 	//List<VideoData> listOfVideos;
 	
 	public static void main(String[] args) throws IOException {
+		
 		new NativeDiscovery().discover();
 		var player = new MediaPlayerFactory().mediaPlayers().newMediaPlayer();
 		player.events().addMediaPlayerEventListener(StreamServerHelper.LISTENER);
@@ -96,14 +97,16 @@ public class ServerMain {
 				out.println(videoData.title);
 				System.out.println("Setup: " + videoData.videoPath);				
 				player.submit(()->{
-					player.media().play(videoData.videoPath, videoData.getOptions(address), "--no-xlib");
+					player.media().play(videoData.videoPath, videoData.getOptions(address), ":file-caching=3000", ":no-sout-all", ":sout-keep");
+					out.println(videoData.title);
+					out.flush();
 				});
 				Thread.sleep(1000 * 5);
 				player.events().addMediaPlayerEventListener(StreamServerHelper.LISTENER);
 				while(player.status().state() != State.STOPPED)
 				{
-					System.out.println("Player State = " + player.status().state());
-					Thread.sleep(1000 * 5);
+					//System.out.println("Player State = " + player.status().state());
+					Thread.sleep(200);
 				}
 			}//end of for loop
 			out.write("quit\n");
@@ -174,6 +177,17 @@ public class ServerMain {
 					mediaPlayer.controls().skipTime(30l * 1000l);
 				}//end of run function
 			});//end of submit
+			break;
+		case "CYCLEAUDIO":
+			mediaPlayer.submit(()->{
+				System.out.println("Current Track = " + mediaPlayer.audio().track());
+				System.out.println("Track count = " + mediaPlayer.audio().trackCount());
+				int targetTrack = mediaPlayer.audio().track()+1 > mediaPlayer.audio().trackCount()? 0:mediaPlayer.audio().track()+1;
+				System.out.println("Target Track = " + targetTrack);
+				mediaPlayer.audio().setTrack(targetTrack);
+				System.out.println("New Track = " + mediaPlayer.audio().track());
+				
+			});
 			break;
 		}//end of switch
 	}
@@ -377,7 +391,8 @@ public class ServerMain {
 		
 			}catch(StringIndexOutOfBoundsException e) {e.printStackTrace();}
 		}
-		videos.sort(videos.get(0));
+		if(!videos.isEmpty())
+			videos.sort(videos.get(0));
 		return videos;
 	}//end of getVideosFromDir
 	

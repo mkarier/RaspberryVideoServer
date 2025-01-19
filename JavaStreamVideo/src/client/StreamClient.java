@@ -1,7 +1,5 @@
 package client;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,19 +9,14 @@ import java.net.Socket;
 import java.util.List;
 
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import shared_class.SharedData;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.javafx.fullscreen.JavaFXFullScreenStrategy;
 import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
-import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class StreamClient extends Application
@@ -131,6 +124,9 @@ public class StreamClient extends Application
 				case TRACK_NEXT:
 				case N:
 					sendCommand("SKIP");
+				case A:
+					sendCommand("CycleAudio");
+					break;
 				case UNDEFINED:
 					System.out.println("UNDEFINED keyCode = " + e.getText());
 					break;
