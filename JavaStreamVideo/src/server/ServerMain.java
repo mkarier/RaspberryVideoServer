@@ -97,7 +97,7 @@ public class ServerMain {
 				out.println(videoData.title);
 				System.out.println("Setup: " + videoData.videoPath);				
 				player.submit(()->{
-					player.media().play(videoData.videoPath, videoData.getOptions(address), ":file-caching=3000", ":no-sout-all", ":sout-keep");
+					player.media().play(videoData.videoPath, videoData.getOptions(address), ":file-caching=5000", ":no-sout-all", ":sout-keep");
 					out.println(videoData.title);
 					out.flush();
 				});
