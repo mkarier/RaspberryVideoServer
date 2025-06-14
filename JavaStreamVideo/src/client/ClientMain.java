@@ -16,7 +16,7 @@ public class ClientMain
 	public static String host = "localhost";
 	public static void main(String[] args) 
 	{
-		JFXStreamClient player = null;
+		StreamClient player = null;
 		String networkOptions = ":network-caching=";
 		try{
 			if(System.getProperty("os.name").contains("Windows"))
@@ -45,7 +45,7 @@ public class ClientMain
 			System.out.println("video Port = " + videoPort);
 			String toPlay = SharedData.access + "://@:" + videoPort;
 			String fromServer = "continue";
-			player = new JFXStreamClient(out);
+			player = new StreamClient(out);
 			player.init(toPlay, networkOptions);
 			System.out.println("initialized the player");
 			player.start();

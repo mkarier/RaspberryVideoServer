@@ -9,7 +9,7 @@ public class FloatMenu
 	JFrame box;// = new JFrame();
 	JLabel commands;
 	
-	public FloatMenu(JFXStreamClient client)
+	public FloatMenu(StreamClient client)
 	{
 		this.box = new JFrame("Floating Menu");
 		String cmd = "<html><p>Spacebar to pause the movie<br>"
