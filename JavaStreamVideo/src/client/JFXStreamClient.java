@@ -19,7 +19,7 @@ import uk.co.caprica.vlcj.javafx.fullscreen.JavaFXFullScreenStrategy;
 import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
-public class StreamClient extends Application
+public class JFXStreamClient extends Application
 {
 	public BufferedWriter out;
 	public BufferedReader in;
