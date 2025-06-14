@@ -86,14 +86,14 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
 			<version>17.0.6</version>
-			<classifier>linux</classifier>
+			<classifier>linux-aarch64</classifier>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
 			<version>17.0.6</version>
-			<classifier>linux</classifier>
+			<classifier>linux-aarch64</classifier>
 		</dependency>
 		<dependency>
 			<groupId>uk.co.caprica</groupId>
