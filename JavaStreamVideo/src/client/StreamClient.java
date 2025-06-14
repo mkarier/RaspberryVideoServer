@@ -20,7 +20,7 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.fullscreen.adaptive.AdaptiveFullScreenStrategy;
 
 
-public class StreamClient extends Thread
+public class StreamClient extends Thread implements AutoCloseable
 {
 	public JFrame box = new JFrame("Client Player");
 	//public GraphicsDevice device;
@@ -163,12 +163,12 @@ public class StreamClient extends Thread
 		this.box.addKeyListener(adapter);
 	}//end of init
 	
-	
+	@Override
 	public void close()
 	{
 		//this.mediaPlayer.controls().stop();
-		//this.mediaPlayer.release();
-		//this.componentPlayer.release();
+		this.mediaPlayer.release();
+		this.componentPlayer.release();
 		this.box.setVisible(false);
 		this.box.dispose();
 		//device.setFullScreenWindow(null);
@@ -188,7 +188,7 @@ public class StreamClient extends Thread
 				this.mediaPlayer.media().play(toPlay, this.networkOptions, ":network-synchronisation");
 				this.mediaPlayer.video().setAdjustVideo(true);
 			});			
-			System.out.println(networkOptions);
+			System.out.println("StreamClient.run " + networkOptions);
 			//this.mediaPlayer.setAudioDelay(audioDelay);
 			/*if(this.inFullScreen)
 			{

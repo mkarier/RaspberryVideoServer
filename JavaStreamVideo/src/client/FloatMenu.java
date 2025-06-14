@@ -3,7 +3,7 @@ package client;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-public class FloatMenu 
+public class FloatMenu implements java.lang.AutoCloseable
 {
 	
 	JFrame box;// = new JFrame();
@@ -19,13 +19,14 @@ public class FloatMenu
 				+ "a for Audio Cycle<br>"
 				+ "n skip forward 30 sec<br></p></html>";
 		this.commands = new JLabel(cmd);
-		//this.commands.addKeyListener(client.getAdapter());
-		//this.box.addKeyListener(client.getAdapter());
+		this.commands.addKeyListener(client.getAdapter());
+		this.box.addKeyListener(client.getAdapter());
 		this.box.add(this.commands);
 		this.box.pack();
 		this.box.setVisible(true);
 	}//end o fconstructor
 	
+	@Override
 	public void close()
 	{
 		this.box.setVisible(false);
