@@ -7,6 +7,7 @@ public class SharedData
 	public static int videoPort = 9998;
 	public static String access = "rtp";
 	public static String vlcPath = "C:\\Program Files\\VideoLAN\\VLC";
+	public static String vlcSnapPath = "/snap/vlc/current/usr/lib/";
 	public static long startTime = 0;
 	public static long endTime = 0;
 	public static int startChapter = 0;

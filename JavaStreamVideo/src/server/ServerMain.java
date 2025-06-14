@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.sun.jna.NativeLibrary;
+
 import shared_class.SharedData;
 import shared_class.VideoData;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
@@ -60,24 +62,36 @@ public class ServerMain {
 	//List<VideoData> listOfVideos;
 	
 	public static void main(String[] args) throws IOException {
-		
-		new NativeDiscovery().discover();
+		/*if(System.getProperty("os.name").contains("Windows"))
+			NativeLibrary.addSearchPath("libvlc", SharedData.vlcPath);
+		else
+		{
+			NativeLibrary.addSearchPath("libvlc", SharedData.vlcSnapPath);
+			System.out.println("OS = linux");
+		}
+		new NativeDiscovery().discover();*/
 		var player = new MediaPlayerFactory().mediaPlayers().newMediaPlayer();
 		player.events().addMediaPlayerEventListener(StreamServerHelper.LISTENER);
 		ArrayList<String> videoTypes = new ArrayList<String>();
 		videoTypes.addAll(Arrays.asList(TypesOfVideos));
 		SharedData options = new SharedData();
 		var listOfVideos = ServerMain.processArgs(args, videoTypes, options);
+		if(listOfVideos.size() == 0)
+		{
+			System.out.println("No Videos found");
+			return;
+		}
 		for(VideoData video: listOfVideos)
 			System.out.println(video.videoPath);
 		
 		
 		try(var server = new ServerSocket(SharedData.comPort);
-			Socket client = server.accept();)
-		{
-			var address = client.getInetAddress().getHostAddress();
+			Socket client = server.accept();
 			var in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			var out = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
+		)
+		{
+			String address = client.getInetAddress().getHostAddress();
 			out.write(SharedData.videoPort + "\n");
 			out.flush();
 			Thread userInputListener = new Thread(()->{
@@ -97,11 +111,11 @@ public class ServerMain {
 				out.println(videoData.title);
 				System.out.println("Setup: " + videoData.videoPath);				
 				player.submit(()->{
-					player.media().play(videoData.videoPath, videoData.getOptions(address), ":file-caching=5000", ":no-sout-all", ":sout-keep");
+					player.media().play(videoData.videoPath, videoData.getOptions(address), ":file-caching=2000", ":no-sout-all", ":sout-keep");
 					out.println(videoData.title);
 					out.flush();
 				});
-				Thread.sleep(1000 * 5);
+				Thread.sleep(1000 * 3);
 				player.events().addMediaPlayerEventListener(StreamServerHelper.LISTENER);
 				while(player.status().state() != State.STOPPED)
 				{
@@ -111,7 +125,7 @@ public class ServerMain {
 			}//end of for loop
 			out.write("quit\n");
 			out.flush();
-		}catch(IOException | InterruptedException e) {
+		}catch(Exception e) {
 			e.printStackTrace();
 		}
 	}//end of main

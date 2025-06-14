@@ -168,7 +168,7 @@ public class StreamClient extends Thread implements AutoCloseable
 	{
 		//this.mediaPlayer.controls().stop();
 		this.mediaPlayer.release();
-		this.componentPlayer.release();
+		//this.componentPlayer.release();
 		this.box.setVisible(false);
 		this.box.dispose();
 		//device.setFullScreenWindow(null);
