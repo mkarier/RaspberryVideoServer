@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.sun.jna.NativeLibrary;
 
@@ -388,6 +389,7 @@ public class ServerMain {
 	
 	public static ArrayList<VideoData> getVideosFromDir(String path, ArrayList<String> videoTypes)
 	{
+		var pattern = java.util.regex.Pattern.compile("S\\d*E\\d*", Pattern.CASE_INSENSITIVE);
 		ArrayList<VideoData> videos = new ArrayList<VideoData>();
 		File folder = new File(path);
 		System.out.println("Directory Path " + folder.getPath());
@@ -395,7 +397,12 @@ public class ServerMain {
 		{
 			try
 			{
-				if(checkIfVideo(file, videoTypes))
+				var matcher = pattern.matcher(file);
+				if(matcher.find() && checkIfDir(folder.getPath() + File.separator + file))
+				{
+					videos.addAll(getVideosFromDir(folder.getPath() + File.separator+ file,videoTypes));
+				}
+				else if(checkIfVideo(file, videoTypes))
 				{
 					if(file.startsWith(File.separator) || path.endsWith(File.separator))
 						videos.add(new VideoData(path + file));
