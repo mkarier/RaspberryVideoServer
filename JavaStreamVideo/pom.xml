@@ -2,9 +2,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>JavaStreamVideo</groupId>
 	<artifactId>JavaStreamVideo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<description>This is a project that can create a server and client to stream video
-</description>
+	<version>0.0.2-SNAPSHOT</version>
+	<description>This is a project that can create a server and client to stream video</description>
+	<properties>
+		<!--<javafx.version>17.0.6</javafx.version>-->
+		<javafx.version>21.0.7-ea+1</javafx.version>
+	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -12,7 +15,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<release>11</release>
+					<release>21</release>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -57,7 +60,7 @@
 				<artifactId>javafx-maven-plugin</artifactId>
 				<version>0.0.8</version>
 				<configuration>
-					<mainClass>client.StreamClient</mainClass>
+					<mainClass>client.JFXStreamClient</mainClass>
 					<mainClass>src.server.Servermain</mainClass>
 				</configuration>
 			</plugin>
@@ -67,39 +70,90 @@
 		<dependency>
 			<groupId>uk.co.caprica</groupId>
 			<artifactId>vlcj</artifactId>
-			<version>4.11.0</version>
+			<version>4.8.1</version>
+		</dependency>
+		<!-- Javafx Section-->
+<!--		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>linux</classifier>
+		</dependency>-->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>linux-aarch64</classifier>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.openjfx/javafx-media -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-media</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>linux-aarch64</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
-			<version>17.0.6</version>
+			<version>${javafx.version}</version>
 			<classifier>win</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>17.0.6</version>
+			<artifactId>javafx-media</artifactId>
+			<version>${javafx.version}</version>
 			<classifier>win</classifier>
 		</dependency>
-	
+		<!-- https://mvnrepository.com/artifact/org.openjfx/javafx-swing -->
+		<!--		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>linux</classifier>
+		</dependency>-->
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>17.0.6</version>
+			<artifactId>javafx-swing</artifactId>
+			<version>${javafx.version}</version>
 			<classifier>linux-aarch64</classifier>
 		</dependency>
-
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>win</classifier>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.openjfx/javafx-graphics -->
+		<!--		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>linux</classifier>
+		</dependency>-->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
-			<version>17.0.6</version>
+			<version>${javafx.version}</version>
 			<classifier>linux-aarch64</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>win</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.controlsfx</groupId>
+			<artifactId>controlsfx</artifactId>
+			<version>11.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.co.caprica</groupId>
 			<artifactId>vlcj-javafx</artifactId>
 			<version>1.2.0</version>
 		</dependency>
+		<!--End of Javafx Section-->
+
 		<!-- https://mvnrepository.com/artifact/uk.co.caprica/vlcj-natives >
 		<dependency>
 			<groupId>uk.co.caprica</groupId>

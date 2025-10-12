@@ -14,6 +14,11 @@ module JavaStreamVideo {
 	requires java.desktop;
 	requires uk.co.caprica.vlcj;
 	requires uk.co.caprica.vlcj.natives;
-	requires javafx.graphics;
 	requires uk.co.caprica.vlcj.javafx;
+	requires javafx.base;
+	requires javafx.controls;
+	requires transitive javafx.graphics;
+	requires javafx.swing;
+	requires javafx.media;
+	requires org.controlsfx.controls;
 }
