@@ -112,7 +112,7 @@ public class ServerMain {
 				out.println(videoData.title);
 				System.out.println("Setup: " + videoData.videoPath);				
 				player.submit(()->{
-					player.media().play(videoData.videoPath, videoData.getOptions(address), ":file-caching=2000", ":no-sout-all", ":sout-keep");
+					player.media().play(videoData.videoPath, videoData.getOptions(address), ":file-caching=2000", ":no-sout-all", ":sout-keep",":audio-filter=normvol ");
 					out.println(videoData.title);
 					out.flush();
 				});
